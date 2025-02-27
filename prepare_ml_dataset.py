@@ -32,12 +32,6 @@ import matplotlib.pyplot as plt
 
 # warnings.simplefilter(action='ignore', category=pd.errors.PerformanceWarning)
 
-random_seed = 42
-tf.random.set_seed(random_seed)
-np.random.seed(random_seed)
-np.set_printoptions(precision=4)
-
-
 def view_data(df_full,ind_good_y, varnames, ylabels, time_array, figname ='temp'):
 
 ### attempt to use tplot, but since tplot can't do scatter/ dot
@@ -131,7 +125,7 @@ def create_feature_history(df_full, feature_names, number_history, average_time,
     n_history_total_days = number_history 
     n_history_total = n_history_total_days*24*60*60/average_time
 
-    m_history = int(n_history_total/24 + 1)
+    m_history = int(n_history_total/(history_resolution/average_time) + 1)
 
     # m is the total number of parameters including features and y
     # m = m_coor + m_y + m_feature * m_history
@@ -140,16 +134,23 @@ def create_feature_history(df_full, feature_names, number_history, average_time,
     index_difference = history_resolution/average_time
     feature_history_names = ["" for x in range(m_feature*m_history)]
     ihf = 0
-    index0 = n_history_total
+    index0 = int(n_history_total)
     index1 = df_full.index[-1]
+
+    df_history = np.zeros((index1-index0+1, m_feature))
 
     for feature_name in feature_names:
         for k in range(m_history):
             name = feature_name + '_' + str(k*2)+'h'
             feature_history_names[ihf] = name
-            df_full.loc[index0:index1,name] = np.array(df_full.loc[(index0 - index_difference*k):(index1-index_difference*k), feature_name])  
-            ihf = ihf + 1
             
+            df_history[:,k] = np.array(df_full.loc[(index0 - index_difference*k):(index1-index_difference*k), feature_name])
+            # df_full.loc[index0:index1,name] = np.array(df_full.loc[(index0 - index_difference*k):(index1-index_difference*k), feature_name])  
+
+            ihf = ihf + 1
+    
+    df_full.loc[index0:index1,feature_names] = df_history  
+
     ## This method is slow but good if different history calculation is wanted
     # def calculate_history(x, df_full, feature_name):
     #     index = df_full['time'] == (x-data_settings["history_resolution"])
@@ -254,13 +255,13 @@ def scale_sw(df_full):
     return df_full
 
 def create_ml_data(df_full, index_train, index_valid,index_test, y_name, coor_names, history_feature_names):
-    y_train = np.array(df_full.loc[index_train, y_name],dtype='float32')
-    y_valid = np.array(df_full.loc[index_valid, y_name],dtype='float32')
-    y_test  = np.array(df_full.loc[index_test, y_name],dtype='float32')
+    y_train = np.array(df_full.loc[index_train, y_name],dtype='float')
+    y_valid = np.array(df_full.loc[index_valid, y_name],dtype='float')
+    y_test  = np.array(df_full.loc[index_test, y_name],dtype='float')
 
-    x_train = np.array(df_full.loc[index_train, coor_names + history_feature_names], dtype='float32')
-    x_valid = np.array(df_full.loc[index_valid, coor_names + history_feature_names], dtype='float32')
-    x_test  = np.array(df_full.loc[index_test,  coor_names + history_feature_names], dtype='float32')
+    x_train = np.array(df_full.loc[index_train, coor_names + history_feature_names], dtype='float')
+    x_valid = np.array(df_full.loc[index_valid, coor_names + history_feature_names], dtype='float')
+    x_test  = np.array(df_full.loc[index_test,  coor_names + history_feature_names], dtype='float')
 
     return x_train, x_valid, x_test, y_train, y_valid, y_test
 
@@ -280,6 +281,11 @@ def create_ml_indexes(df_full, test_ts, test_te, index_good, train_size=0.8):
         index_valid: index of df_full for validation data
         index_test: index of df_full for test data
     """
+    
+    random_seed = 42
+    tf.random.set_seed(random_seed)
+    np.random.seed(random_seed)
+    np.set_printoptions(precision=4)
     
     index_test = (df_full['Datetime'] >= test_ts ) & (df_full['Datetime'] <= test_te ) & index_good
 
@@ -332,20 +338,20 @@ def create_df_full(release, y_name, y_name_log, feature_names, dL01, number_hist
     return df_full, index_good, feature_history_names
 
 def save_csv_data(x_train, x_valid, x_test, y_train, y_valid, y_test, dataset_csv):
-    pd.DataFrame(x_train).to_csv(dataset_csv["x_train"]) 
-    pd.DataFrame(y_train).to_csv(dataset_csv["y_train"]) 
-    pd.DataFrame(x_valid).to_csv(dataset_csv["x_valid"]) 
-    pd.DataFrame(y_valid).to_csv(dataset_csv["y_valid"]) 
-    pd.DataFrame(x_test).to_csv(dataset_csv["x_test"]) 
-    pd.DataFrame(y_test).to_csv(dataset_csv["y_test"]) 
+    pd.DataFrame(x_train).to_csv(dataset_csv["x_train"], index=False) 
+    pd.DataFrame(y_train).to_csv(dataset_csv["y_train"], index=False) 
+    pd.DataFrame(x_valid).to_csv(dataset_csv["x_valid"], index=False) 
+    pd.DataFrame(y_valid).to_csv(dataset_csv["y_valid"], index=False) 
+    pd.DataFrame(x_test).to_csv(dataset_csv["x_test"], index=False) 
+    pd.DataFrame(y_test).to_csv(dataset_csv["y_test"], index=False) 
     
 def load_csv_data(dataset_csv):
-    x_train = pd.read_csv(dataset_csv["x_train"])
-    y_train = pd.read_csv(dataset_csv["y_train"])
-    x_valid = pd.read_csv(dataset_csv["x_valid"])
-    y_valid = pd.read_csv(dataset_csv["y_valid"])
-    x_test = pd.read_csv(dataset_csv["x_test"])
-    y_test = pd.read_csv(dataset_csv["y_test"])
+    x_train = pd.read_csv(dataset_csv["x_train"], index_col=False)
+    y_train = pd.read_csv(dataset_csv["y_train"], index_col=False)
+    x_valid = pd.read_csv(dataset_csv["x_valid"], index_col=False)
+    y_valid = pd.read_csv(dataset_csv["y_valid"], index_col=False)
+    x_test = pd.read_csv(dataset_csv["x_test"], index_col=False)
+    y_test = pd.read_csv(dataset_csv["y_test"], index_col=False)
 
     return x_train, x_valid, x_test, y_train, y_valid, y_test
 
@@ -384,7 +390,13 @@ def prepare_ml_dataset(energy, species, recalc = False, plot_data = False, save_
     
         # Each round, one can only train one y. If train more than one y, need to  repeat from here
         x_train, x_valid, x_test, y_train, y_valid, y_test = create_ml_data(df_full, index_train, index_valid, index_test, data_settings["y_name_log"] , data_settings["coor_names"], data_settings["feature_history_names"])  
-    
+        
+        print("shapes of x_train, x_valid, x_test, y_train, y_valid, y_test ")
+        print(x_train.shape, x_valid.shape, x_test.shape, y_train.shape, y_valid.shape, y_test.shape)
+        
+# dl10 False: ((699122, 344), (175324, 344), (174570, 344), (699122,), (175324,), (174570,))
+# dl10 True:  ((475943, 344), (119522, 344), (116124, 344), (475943,), (119522,), (116124,))
+
     if plot_data:
         plot_plasma_data(df_full, index_good, data_settings["y_name"] ,data_settings["y_name_log"], directories["data_view_dir"])
         
@@ -417,6 +429,7 @@ def view_data(df_full,ind_good_y, varnames, ylabels, time_array, figname ='temp'
         
     plt.savefig(figname + ".png", format = "png", dpi = 300)
 
-def __main__():
-    if __name__ == "__name__":
-        prepare_ml_dataset('972237', 'h')
+# def __main__():
+#     if __name__ == "__name__":
+prepare_ml_dataset('972237', 'h',recalc=True)
+

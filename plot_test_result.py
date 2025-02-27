@@ -16,7 +16,6 @@ import matplotlib as mpl
 import math
 import pytplot
 from pyspedas import time_double, time_string
-import functions
 import datetime as datetime
 import matplotlib.dates as mdates
 
@@ -59,8 +58,8 @@ def plot_global_distributions(df_omni, models, exmaple_start_time,exmaple_end_ti
     df_example = pd.DataFrame(data = {'theta': theta_example_mesh.reshape([-1]), 'l': l_example_mesh.reshape([-1])})
 
     df_example['lat'] = lat_setting
-    df_example['scaled_lat'] = df_example['lat'].apply(lambda x: functions.scale_arr_with_input(x, 44.388, 49.445))
-    df_example['scaled_l'] = df_example['l'].apply(lambda x: functions.scale_arr_with_input(x, 4.661, 6.408))
+    df_example['scaled_lat'] = df_example['lat'].apply(lambda x: scale_arr_with_input(x, 44.388, 49.445))
+    df_example['scaled_l'] = df_example['l'].apply(lambda x: scale_arr_with_input(x, 4.661, 6.408))
 
     df_example['sin0'] = df_example['theta'].apply(np.sin)
     df_example['cos0'] = df_example['theta'].apply(np.cos)
@@ -139,8 +138,8 @@ def plot_global_distribution(fig_global, ax, df_omni, model, time_cut, y_name, c
     df_example = pd.DataFrame(data = {'theta': theta_example_mesh.reshape([-1]), 'l': l_example_mesh.reshape([-1])})
 
     df_example['lat'] = lat_setting
-    df_example['scaled_lat'] = df_example['lat'].apply(lambda x: functions.scale_arr_with_input(x, 44.388, 49.445))
-    df_example['scaled_l'] = df_example['l'].apply(lambda x: functions.scale_arr_with_input(x, 4.661, 6.408))
+    df_example['scaled_lat'] = df_example['lat'].apply(lambda x: scale_arr_with_input(x, 44.388, 49.445))
+    df_example['scaled_l'] = df_example['l'].apply(lambda x: scale_arr_with_input(x, 4.661, 6.408))
 
     df_example['sin0'] = df_example['theta'].apply(np.sin)
     df_example['cos0'] = df_example['theta'].apply(np.cos)
@@ -297,7 +296,10 @@ def draw_panel_in_time_plot(fig, ax, obj0, last_panel = False, label_size = 20, 
 
 
 def plot_test_tplot(omni_ts, y_data_ts, y_pred_ts, y_diff_ts, filename = ''):
+
     n_panels = len(omni_ts) + 3*len(y_data_ts)
+    
+    fig, axs = plt.subplots(n_panels, 1, figsize=(10, 8), facecolor = 'white')
 
     last_panel = False
     for ipanel in range(len(omni_ts)):

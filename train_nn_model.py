@@ -14,7 +14,7 @@ train_nn_model('51767680', 'h', number_history = 7)
 """
 
 import numpy as np
-import matplotlib.pyplot as plt
+import matplotlib.pyplot as plt 
 import pandas as pd
 from sklearn.metrics import r2_score
 import matplotlib as mpl
@@ -150,9 +150,10 @@ def nn_model(x_train, y_train, x_valid, y_valid, y_name, output_dir = 'training/
     model  =  tf.keras.models.Sequential([
         tf.keras.layers.Input(x_train.shape[1:]), 
         tf.keras.layers.Dense(units = n_neurons, activation = "relu"), # , kernel_regularizer = tf.keras.regularizers.L2(0.01)),
-        tf.keras.layers.Dense(units = n_neurons, activation = "relu", input_shape = (n_neurons + 1,0)),
-        tf.keras.layers.Dense(units = n_neurons, activation = "relu", input_shape = (n_neurons + 1,0)),
-#       tf.keras.layers.Dense(units = n_neurons, activation = "relu", input_shape = (n_neurons + 1,0)),
+        # Dropout(0.5),
+        tf.keras.layers.Dense(units = n_neurons, activation = "relu"),
+        tf.keras.layers.Dense(units = n_neurons, activation = "relu"),
+#       tf.keras.layers.Dense(units = n_neurons, activation = "relu"),
         tf.keras.layers.Dense(1)
     ])
     
@@ -167,13 +168,13 @@ def nn_model(x_train, y_train, x_valid, y_valid, y_name, output_dir = 'training/
     if model_fln == '':
         model_fln = fln  + ".h5"
     if mse_fln == '':
-        mse_fln = fln + '_mse.png'
+        mse_fln = fln + '_mse'
     
     model.save(model_fln)
     print(history)
 
     # plot the mse loss function at each epoch
-    plot_loss_function_history(history, figname = mse_fln, ylim = [0, 0.3]) 
+    plot_loss_function_history(history, figname = mse_fln, ylim = [0, 0.5]) 
    
     # calculate the accuracy of validation data
     y_valid_pred = model.predict(x_valid)
@@ -182,6 +183,15 @@ def nn_model(x_train, y_train, x_valid, y_valid, y_name, output_dir = 'training/
     valid_r2 = r2_score(y_valid_pred.reshape([-1]), y_valid.reshape([-1]))
 
     return(model, history,valid_r2)
+
+def plot_training_comparisons(para_set, para_name, valid_r2s, data_settings, directories):
+    plt.plot(np.array(para_set), valid_r2s, marker = 'o')
+    plt.title(para_name)
+    plt.xlabel(data_settings["y_name"])
+    plt.ylabel("Validation r2")
+    plt.savefig(directories["training_output_dir"]  + data_settings["y_name"]+'_'+para_name+'_r2.png', format="png", dpi=300)
+    
+    return True
 
 def train_nn_model(energy, species, recalc = False, plot_data = False, save_data = True, release = 'rel05', dL01=True,coor_names=["cos0", 'sin0', 'scaled_lat','scaled_l'], feature_names=[ 'scaled_symh', 'scaled_ae','scaled_asyh', 'scaled_asyd'], forecast = False, number_history = 7):
 
@@ -195,7 +205,6 @@ def train_nn_model(energy, species, recalc = False, plot_data = False, save_data
         print("data has nan")
         return False
     
-    
     para_name = "learning_rate"
     para_set = [1.e-4, 1.5e-3, 1.e-3]
 
@@ -207,7 +216,7 @@ def train_nn_model(energy, species, recalc = False, plot_data = False, save_data
     for ipara in range(len(para_set)):
         parameter = para_set[ipara]
 
-        model, history, valid_r2 = nn_model(x_train, y_train, x_valid, y_valid, data_settings["y_name"], output_dir = directories["training_output_dir"] , model_fln = '', mse_fln = '', n_neurons = 18, dropout_rate = 0.0, patience = 32, learning_rate = parameter, epochs = 20, batch_size = 8, dL01= dL01)
+        model, history, valid_r2 = nn_model(x_train, y_train, x_valid, y_valid, data_settings["y_name_log"], output_dir = directories["training_output_dir"] , model_fln = '', mse_fln = '', n_neurons = 18, dropout_rate = 0.0, patience = 32, learning_rate = parameter, epochs = 2, batch_size = 8, dL01= dL01)
         
         total_history[str(parameter)] = history.history
         final_train_loss[ipara] = history.history['loss'][-1]
@@ -219,13 +228,9 @@ def train_nn_model(energy, species, recalc = False, plot_data = False, save_data
     plot_loss_function_historys(total_history, para_set, para_str = para_name, figname = directories["model_setting_compare_dir"] + data_settings["y_name"]+'_'+para_name, dataset_name='val_loss', ylim = [0,0.5])
 
     plot_loss_function_historys(total_history, para_set, para_str = para_name, figname = directories["model_setting_compare_dir"] + data_settings["y_name"]+'_'+para_name, dataset_name='loss', ylim = [0,0.5])
-
-    plt.plot(np.array(para_set), valid_r2s, marker = 'o')
-    plt.title(para_name)
-    plt.xlabel(data_settings["y_name"])
-    plt.ylabel('Validation r2')
-    plt.savefig(output_dir = directories["training_output_dir"]  + data_settings["y_name"]+'_'+para_name+'_r2.png', format="png", dpi=300)
-    
+   
+    plot_training_comparisons(para_set, para_name, valid_r2s, data_settings, directories)
+   
     return True
 
 def __main__():
