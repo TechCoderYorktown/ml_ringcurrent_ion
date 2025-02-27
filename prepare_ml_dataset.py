@@ -85,6 +85,7 @@ def initializ_var(energy, species, release = 'rel05', dL01=True, average_time = 
         "y_test"  : directories["ml_data"] + species+'_'+energy + '_' + str(number_history) + 'days_' + "y_test.csv"  } 
     
     data_settings = {
+        "release" : release,
         "average_time" : average_time,
         "dL01" : dL01,
         "forecast" : forecast,
@@ -101,7 +102,6 @@ def initializ_var(energy, species, release = 'rel05', dL01=True, average_time = 
     
     
     return directories, dataset_csv, data_settings
-
 
 # def convert_data_to_dL01(l):
 #     n_l = len(l)
@@ -137,19 +137,20 @@ def create_feature_history(df_full, feature_names, number_history, average_time,
     index0 = int(n_history_total)
     index1 = df_full.index[-1]
 
-    df_history = np.zeros((index1-index0+1, m_feature))
+    df_history = np.zeros((index1-index0+1, len(feature_history_names)))
 
     for feature_name in feature_names:
         for k in range(m_history):
             name = feature_name + '_' + str(k*2)+'h'
             feature_history_names[ihf] = name
             
-            df_history[:,k] = np.array(df_full.loc[(index0 - index_difference*k):(index1-index_difference*k), feature_name])
+            temp = np.array(df_full.loc[(index0 - index_difference*k):(index1-index_difference*k), feature_name])
+            df_history[:,k] = temp
             # df_full.loc[index0:index1,name] = np.array(df_full.loc[(index0 - index_difference*k):(index1-index_difference*k), feature_name])  
 
             ihf = ihf + 1
-    
-    df_full.loc[index0:index1,feature_names] = df_history  
+
+    df_full.loc[index0:index1, feature_history_names] = df_history  
 
     ## This method is slow but good if different history calculation is wanted
     # def calculate_history(x, df_full, feature_name):
@@ -429,7 +430,7 @@ def view_data(df_full,ind_good_y, varnames, ylabels, time_array, figname ='temp'
         
     plt.savefig(figname + ".png", format = "png", dpi = 300)
 
-# def __main__():
-#     if __name__ == "__name__":
-prepare_ml_dataset('972237', 'h',recalc=True)
+def __main__():
+    if __name__ == "__name__":
+        prepare_ml_dataset('972237', 'h',recalc=True)
 
