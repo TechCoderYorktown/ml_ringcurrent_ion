@@ -24,33 +24,18 @@ import tensorflow as tf
 import math
 import swifter
 # import ml_wrappers
-from pyspedas import time_string
+from time_string import time_string
 # import warnings
 import fnmatch
 from sklearn.model_selection import train_test_split
 import matplotlib.pyplot as plt
 
-# warnings.simplefilter(action='ignore', category=pd.errors.PerformanceWarning)
+import plot_functions
 
-def view_data(df_full,ind_good_y, varnames, ylabels, time_array, figname ='temp'):
-
-### attempt to use tplot, but since tplot can't do scatter/ dot
-# pytplot.store_data(y_name_original, data={'x':time_array, 'y':df_full.loc[index_good, y_name_original]})
-# pytplot.store_data(y_name, data={'x':time_array, 'y':df_full.loc[index_good, y_name]})
-# # pytplot.options(y_name_original,'line_style','dot')
-# pytplot.tplot([y_name_original, y_name])
-
-    nvar = len(varnames)
-
-    fig1, ax1 = plt.subplots(nvar,1, constrained_layout = True)
-    fig1.set_size_inches(8, nvar*2)
-    
-    for ivar in range(len(varnames)):
-        varname = varnames[ivar]
-        ax1[ivar].scatter(time_array,df_full.loc[ind_good_y, varname],s = 0.1)
-        ax1[ivar].set_ylabel(ylabels[ivar])
-        
-    plt.savefig(figname + ".png", format = "png", dpi = 300)
+random_seed = 42
+tf.random.set_seed(random_seed)
+np.random.seed(random_seed)
+np.set_printoptions(precision=4)
 
 def scale_arr(arr):
     index = np.isfinite(arr)
@@ -72,7 +57,8 @@ def initializ_var(energy, species, release = 'rel05', dL01=True, average_time = 
         "training_output_dir" : path + "training/", 
         "data_view_dir" : path + "data_view/",
         "model_setting_compare_dir" : path + "model_setting_compare/"  ,
-        "ml_data" : path + "ml_data/"}
+        "ml_data" : path + "ml_data/", 
+        "model_dir": path + "model/"}
     
     create_directories(directories.values())
     
@@ -97,6 +83,7 @@ def initializ_var(energy, species, release = 'rel05', dL01=True, average_time = 
         "feature_names" : feature_names,
         "y_name" : species + '_flux_' + energy,
         "y_name_log" : 'log_' + species + '_flux_' + energy, 
+        "model_filename" : 'log_' + species + '_flux_' + energy + '.h5',
         "test_ts" : test_ts,
         "test_te" : test_te     }
     
@@ -356,8 +343,19 @@ def load_csv_data(dataset_csv):
 
     return x_train, x_valid, x_test, y_train, y_valid, y_test
 
-def view_data(self):
-    help, self.df_full.loc[self.index_good, :]
+def load_test_data(dataset_csv):
+    x_test = pd.read_csv(dataset_csv["x_test"], index_col=False)
+    y_test = pd.read_csv(dataset_csv["y_test"], index_col=False)
+    
+    return x_test, y_test
+
+def load_training_data(dataset_csv):
+    x_train = pd.read_csv(dataset_csv["x_train"], index_col=False)
+    y_train = pd.read_csv(dataset_csv["y_train"], index_col=False)
+    x_valid = pd.read_csv(dataset_csv["x_valid"], index_col=False)
+    y_valid = pd.read_csv(dataset_csv["y_valid"], index_col=False)
+
+    return x_train, x_valid, y_train, y_valid
 
 def print_model(self):
     print(self.data_settings)
@@ -365,17 +363,17 @@ def print_model(self):
 def plot_plasma_data(df_full, index_good,y_name,y_name_log, data_view_dir):        
     time_array = df_full.loc[index_good,'Datetime'].astype('datetime64[ns]').reset_index(drop=True)
     
-    view_data(df_full, index_good, [y_name,y_name_log], [y_name,y_name_log], time_array, figname = data_view_dir + 'rbsp_'+y_name)
+    plot_functions.view_data(df_full, index_good, [y_name,y_name_log], [y_name,y_name_log], time_array, figname = data_view_dir + 'rbsp_'+y_name)
     
 def plot_index_data(df_full, index_good, data_view_dir):
     time_array = df_full.loc[index_good,'Datetime'].astype('datetime64[ns]').reset_index(drop=True)
 
-    view_data(df_full, index_good, ['mlt',"cos0",'sin0','l','scaled_l','lat','scaled_lat'], ['MLT','cos theta','sin theta','L','scaled L','LAT','scaled LAT'], time_array, figname = data_view_dir + 'coor')
+    plot_functions.view_data(df_full, index_good, ['mlt',"cos0",'sin0','l','scaled_l','lat','scaled_lat'], ['MLT','cos theta','sin theta','L','scaled L','LAT','scaled LAT'], time_array, figname = data_view_dir + 'coor')
     
 def plot_sw_data(df_full, index_good, data_view_dir):
     time_array = df_full.loc[index_good,'Datetime'].astype('datetime64[ns]').reset_index(drop=True)
 
-    view_data(df_full, index_good, ['swp',"scaled_swp",'swn','scaled_swn','swv','scaled_swv','by','scaled_by',"bz","scaled_bz"], ['SW P','scaled SW P','SW N','scaled SW N','SW V','scaled SW V','IMF By','scaled IMF By','IMF Bz','scaled IMF Bz'], time_array, figname = data_view_dir + 'sw')
+    plot_functions.view_data(df_full, index_good, ['swp',"scaled_swp",'swn','scaled_swn','swv','scaled_swv','by','scaled_by',"bz","scaled_bz"], ['SW P','scaled SW P','SW N','scaled SW N','SW V','scaled SW V','IMF By','scaled IMF By','IMF Bz','scaled IMF Bz'], time_array, figname = data_view_dir + 'sw')
 
 def prepare_ml_dataset(energy, species, recalc = False, plot_data = False, save_data = True, release = 'rel05', dL01=True, average_time = 300, coor_names=["cos0", 'sin0', 'scaled_lat','scaled_l'], feature_names=[ 'scaled_symh', 'scaled_ae','scaled_asyh', 'scaled_asyd'], forecast = False, number_history = 7, history_resolution = 2*3600. , test_ts = '2017-01-01', test_te = '2018-01-01'):
     
@@ -409,26 +407,6 @@ def prepare_ml_dataset(energy, species, recalc = False, plot_data = False, save_
         save_csv_data(x_train, x_valid, x_test, y_train, y_valid, y_test , dataset_csv)
 
     return x_train, x_valid, x_test, y_train, y_valid, y_test       
-
-def view_data(df_full,ind_good_y, varnames, ylabels, time_array, figname ='temp'):
-
-### attempt to use tplot, but since tplot can't do scatter/ dot
-# pytplot.store_data(y_name_original, data={'x':time_array, 'y':df_full.loc[index_good, y_name_original]})
-# pytplot.store_data(y_name, data={'x':time_array, 'y':df_full.loc[index_good, y_name]})
-# # pytplot.options(y_name_original,'line_style','dot')
-# pytplot.tplot([y_name_original, y_name])
-
-    nvar = len(varnames)
-
-    fig1, ax1 = plt.subplots(nvar,1, constrained_layout = True)
-    fig1.set_size_inches(8, nvar*2)
-    
-    for ivar in range(len(varnames)):
-        varname = varnames[ivar]
-        ax1[ivar].scatter(time_array,df_full.loc[ind_good_y, varname],s = 0.1)
-        ax1[ivar].set_ylabel(ylabels[ivar])
-        
-    plt.savefig(figname + ".png", format = "png", dpi = 300)
 
 def __main__():
     if __name__ == "__name__":
