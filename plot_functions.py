@@ -28,12 +28,6 @@ def scale_arr_with_input(arr, mid_value, scale_value):
 
 def view_data(df_full,ind_good_y, varnames, ylabels, time_array, figname ='temp'):
 
-### attempt to use tplot, but since tplot can't do scatter/ dot
-# pytplot.store_data(y_name_original, data={'x':time_array, 'y':df_full.loc[index_good, y_name_original]})
-# pytplot.store_data(y_name, data={'x':time_array, 'y':df_full.loc[index_good, y_name]})
-# # pytplot.options(y_name_original,'line_style','dot')
-# pytplot.tplot([y_name_original, y_name])
-
     nvar = len(varnames)
 
     fig1, ax1 = plt.subplots(nvar,1, constrained_layout = True)

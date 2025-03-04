@@ -22,13 +22,13 @@ import numpy as np
 import pandas as pd
 import tensorflow as tf
 import math
-import swifter
+# import swifter
 # import ml_wrappers
 from time_string import time_string
 # import warnings
 import fnmatch
 from sklearn.model_selection import train_test_split
-import matplotlib.pyplot as plt
+# import matplotlib.pyplot as plt
 
 import plot_functions
 
@@ -63,6 +63,7 @@ def initializ_var(energy, species, release = 'rel05', dL01=True, average_time = 
     create_directories(directories.values())
     
     dataset_csv = {
+        "df_full" : directories["ml_data"] + species+'_'+energy + '_' + str(number_history) + 'days_' + "df_full.csv",
         "x_train" : directories["ml_data"] + species+'_'+energy + '_' + str(number_history) + 'days_' + "x_train.csv",
         "y_train" : directories["ml_data"] + species+'_'+energy + '_' + str(number_history) + 'days_' + "y_train.csv",
         "x_valid" : directories["ml_data"] + species+'_'+energy + '_' + str(number_history) + 'days_' + "x_valid.csv",
@@ -125,14 +126,14 @@ def create_feature_history(df_full, feature_names, number_history, average_time,
     index1 = df_full.index[-1]
 
     df_history = np.zeros((index1-index0+1, len(feature_history_names)))
-
+    
     for feature_name in feature_names:
         for k in range(m_history):
             name = feature_name + '_' + str(k*2)+'h'
             feature_history_names[ihf] = name
             
             temp = np.array(df_full.loc[(index0 - index_difference*k):(index1-index_difference*k), feature_name])
-            df_history[:,k] = temp
+            df_history[:,ihf] = temp
             # df_full.loc[index0:index1,name] = np.array(df_full.loc[(index0 - index_difference*k):(index1-index_difference*k), feature_name])  
 
             ihf = ihf + 1
@@ -305,7 +306,7 @@ def create_ml_indexes(df_full, test_ts, test_te, index_good, train_size=0.8):
     
     return index_train, index_valid, index_test
 
-def create_df_full(release, y_name, y_name_log, feature_names, dL01, number_history, history_resolution, average_time, forecast, data_dir):
+def create_df_full(release, y_name, y_name_log, feature_names, dL01, number_history, history_resolution, average_time, forecast, data_dir, dataset_csv):
     df_full = read_csv_data(data_dir, release)      
 
     index_good = create_good_index(df_full, y_name , feature_names, dL01)
@@ -332,7 +333,7 @@ def save_csv_data(x_train, x_valid, x_test, y_train, y_valid, y_test, dataset_cs
     pd.DataFrame(y_valid).to_csv(dataset_csv["y_valid"], index=False) 
     pd.DataFrame(x_test).to_csv(dataset_csv["x_test"], index=False) 
     pd.DataFrame(y_test).to_csv(dataset_csv["y_test"], index=False) 
-    
+
 def load_csv_data(dataset_csv):
     x_train = pd.read_csv(dataset_csv["x_train"], index_col=False)
     y_train = pd.read_csv(dataset_csv["y_train"], index_col=False)
@@ -359,12 +360,12 @@ def load_training_data(dataset_csv):
 
 def print_model(self):
     print(self.data_settings)
-                        
+
 def plot_plasma_data(df_full, index_good,y_name,y_name_log, data_view_dir):        
     time_array = df_full.loc[index_good,'Datetime'].astype('datetime64[ns]').reset_index(drop=True)
     
     plot_functions.view_data(df_full, index_good, [y_name,y_name_log], [y_name,y_name_log], time_array, figname = data_view_dir + 'rbsp_'+y_name)
-    
+
 def plot_index_data(df_full, index_good, data_view_dir):
     time_array = df_full.loc[index_good,'Datetime'].astype('datetime64[ns]').reset_index(drop=True)
 
@@ -375,6 +376,16 @@ def plot_sw_data(df_full, index_good, data_view_dir):
 
     plot_functions.view_data(df_full, index_good, ['swp',"scaled_swp",'swn','scaled_swn','swv','scaled_swv','by','scaled_by',"bz","scaled_bz"], ['SW P','scaled SW P','SW N','scaled SW N','SW V','scaled SW V','IMF By','scaled IMF By','IMF Bz','scaled IMF Bz'], time_array, figname = data_view_dir + 'sw')
 
+def save_df_full(df_full, index_good, index_train, index_valid, index_test, dataset_csv):
+            
+    df_full["index_good"] = index_good
+    df_full["index_train"] = index_train
+    df_full["index_valid"] = index_valid
+    df_full["index_test"] = index_test
+
+    df_full.to_csv(dataset_csv["df_full"], index=False)
+    return True
+
 def prepare_ml_dataset(energy, species, recalc = False, plot_data = False, save_data = True, release = 'rel05', dL01=True, average_time = 300, coor_names=["cos0", 'sin0', 'scaled_lat','scaled_l'], feature_names=[ 'scaled_symh', 'scaled_ae','scaled_asyh', 'scaled_asyd'], forecast = False, number_history = 7, history_resolution = 2*3600. , test_ts = '2017-01-01', test_te = '2018-01-01'):
     
     directories, dataset_csv, data_settings = initializ_var(energy, species, release = release, dL01=dL01, average_time = average_time, coor_names=coor_names, feature_names=feature_names, forecast = forecast, number_history = number_history, history_resolution = history_resolution, test_ts=test_ts, test_te=test_te)
@@ -382,7 +393,7 @@ def prepare_ml_dataset(energy, species, recalc = False, plot_data = False, save_
     if os.path.exists(dataset_csv["x_train"]) & (recalc != True):
         x_train, x_valid, x_test, y_train, y_valid, y_test  = load_csv_data(dataset_csv)
     else:             
-        df_full, index_good, data_settings["feature_history_names"] = create_df_full(release, data_settings["y_name"] , data_settings["y_name_log"] ,  data_settings["feature_names"] , data_settings["dL01"] , data_settings["number_history"] , data_settings["history_resolution"] , data_settings["average_time"], data_settings["forecast"] , directories["data_dir"] )
+        df_full, index_good, data_settings["feature_history_names"] = create_df_full(release, data_settings["y_name"] , data_settings["y_name_log"] ,  data_settings["feature_names"] , data_settings["dL01"] , data_settings["number_history"] , data_settings["history_resolution"] , data_settings["average_time"], data_settings["forecast"] , directories["data_dir"], dataset_csv)
 
         #set test set. Here we use one year (2017) of data for test set 
         index_train, index_valid, index_test = create_ml_indexes(df_full,  data_settings["test_ts"], data_settings["test_te"] , index_good)
@@ -390,6 +401,7 @@ def prepare_ml_dataset(energy, species, recalc = False, plot_data = False, save_
         # Each round, one can only train one y. If train more than one y, need to  repeat from here
         x_train, x_valid, x_test, y_train, y_valid, y_test = create_ml_data(df_full, index_train, index_valid, index_test, data_settings["y_name_log"] , data_settings["coor_names"], data_settings["feature_history_names"])  
         
+
         print("shapes of x_train, x_valid, x_test, y_train, y_valid, y_test ")
         print(x_train.shape, x_valid.shape, x_test.shape, y_train.shape, y_valid.shape, y_test.shape)
         
@@ -404,6 +416,8 @@ def prepare_ml_dataset(energy, species, recalc = False, plot_data = False, save_
         plot_sw_data(df_full, index_good, directories["data_view_dir"])
     
     if save_data:
+        save_df_full(df_full, index_good, index_train, index_valid, index_test, dataset_csv)
+
         save_csv_data(x_train, x_valid, x_test, y_train, y_valid, y_test , dataset_csv)
 
     return x_train, x_valid, x_test, y_train, y_valid, y_test       

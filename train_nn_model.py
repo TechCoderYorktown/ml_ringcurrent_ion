@@ -126,4 +126,4 @@ def train_nn_model(energy, species, recalc = False, plot_data = False, save_data
 
 def __main__():
     if __name__ == "__name__":
-        prepare_ml_dataset('972237', 'h')
+        train_nn_model('972237', 'h')
