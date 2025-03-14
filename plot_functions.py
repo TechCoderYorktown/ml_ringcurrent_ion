@@ -26,7 +26,7 @@ def scale_arr_with_input(arr, mid_value, scale_value):
     return(scaled_arr)
 
 
-def view_data(df_full,ind_good_y, varnames, ylabels, time_array, figname ='temp'):
+def view_data(df_full, varnames, ylabels, time_array, figname ='temp'):
 
     nvar = len(varnames)
 
@@ -35,7 +35,7 @@ def view_data(df_full,ind_good_y, varnames, ylabels, time_array, figname ='temp'
     
     for ivar in range(len(varnames)):
         varname = varnames[ivar]
-        ax1[ivar].scatter(time_array[ind_good_y],df_full.loc[ind_good_y, varname],s = 0.1)
+        ax1[ivar].scatter(time_array,df_full[varname],s = 0.1)
         ax1[ivar].set_ylabel(ylabels[ivar])
         
     plt.savefig(figname + ".png", format = "png", dpi = 300)
@@ -350,7 +350,7 @@ def create_time_series_class(x, y, v = [], xlabel = 'x', ylabel = 'y',vlabel = '
 def create_time_series_variables(df_full, index_plot, y_names, y_pred_reshaped, to_plot_omni_list=['symh'], to_plot_omni_label_list = ['SymH (nT)'], unitlabel = ['']) :
     if(len(to_plot_omni_list) != len(to_plot_omni_label_list)):
         print("to_plot_omni_list must have the same length as to_plot_omni_label")
-        
+    
     time_test = df_full['Datetime'].astype('datetime64[ns]')[index_plot]     
         
     omni_ts = list()
@@ -365,13 +365,11 @@ def create_time_series_variables(df_full, index_plot, y_names, y_pred_reshaped, 
     
     for iy in range(len(y_names)):
         y_name = y_names[iy]
-        y_data_ts.append(create_time_series_class(time_test, df_full.loc[index_plot,'l'], v = df_full.loc[index_plot,y_name], ylabel = 'L (data)', plot_style = 'scatter', vrange=[2,7], cmap='jet',vlabel='log10(flux)'))
-        y_pred_ts.append(create_time_series_class(time_test, df_full.loc[index_plot,'l'], v = y_pred_reshaped[iy], ylabel = 'L (model)', plot_style = 'scatter', vrange=[2,7], cmap='jet',vlabel='log10(flux)'))
+        y_data_ts.append(create_time_series_class(time_test, df_full.loc[index_plot,'l'], v = df_full.loc[index_plot,y_name], ylabel = 'L (data)', plot_style = 'scatter', vrange=[2,7], cmap='jet',vlabel='log10(flux)', unitlabel = unitlabel))
+        y_pred_ts.append(create_time_series_class(time_test, df_full.loc[index_plot,'l'], v = y_pred_reshaped[iy], ylabel = 'L (model)', plot_style = 'scatter', vrange=[2,7], cmap='jet',vlabel='log10(flux)', unitlabel = unitlabel))
         y_diff_ts.append(create_time_series_class(time_test, df_full.loc[index_plot,'l'], v = y_pred_reshaped[iy] - df_full.loc[index_plot,y_name], ylabel = 'L (model-data)', plot_style = 'scatter', vrange=[-2,2], cmap='bwr',vlabel=''))        
         
     return(omni_ts, y_data_ts, y_pred_ts, y_diff_ts)
-
-
 
 # --- function to draw panel in a time tplot using matplotlib  ---
 def draw_panel_in_time_plot(fig, ax, obj0, last_panel = False, label_size = 20, time_cut = ''):
@@ -446,8 +444,7 @@ def plot_test_tplot(omni_ts, y_data_ts, y_pred_ts, y_diff_ts, filename = '', lab
         fig.savefig(filename+".png", format="png", dpi=300)
 
     plt.show()
-    
-    
+   
     
 def plot_tplot_and_global_distribution(df_omni, to_plot_omni_list, to_plot_omni_label_list, index_plot, models,  time_cut, y_names, coor_names, feature_history_names, output_filename = 'global.png', v_label = ''):
 

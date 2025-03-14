@@ -38,12 +38,11 @@ def plot_test_heatmap(energy, species, recalc = False, plot_data = False, save_d
     
     plot_functions.plot_correlation_heatmap(y_test, y_test_pred, xrange=[1,8], figname = directories["result_dir"] + data_settings["y_name_log"]+'_test_r2')
 
-
 def plot_test_tplot(energy, species, release = 'rel05', dL01=True, feature_names=[ 'scaled_symh', 'scaled_ae','scaled_asyh', 'scaled_asyd'], forecast = False, number_history = 7):
     """
         The following sections are to visulize the long-term variation of modeled proton flux
     """
-    
+
     directories, dataset_csv, data_settings = prepare_ml_dataset.initializ_var(energy, species, release = release, dL01=dL01, feature_names=feature_names, forecast = forecast, number_history = number_history)
 
     df_full, index_good, data_settings["feature_history_names"] = plot_functions.create_df_full(release, data_settings["y_name"] , data_settings["y_name_log"] ,  data_settings["feature_names"] , data_settings["dL01"] , data_settings["number_history"] , data_settings["history_resolution"] , data_settings["average_time"], data_settings["forecast"] , directories["data_dir"] )
