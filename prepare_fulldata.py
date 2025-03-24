@@ -57,10 +57,10 @@ def read_probes_data(data_dir, fulldata_settings):
     
     return df_full
 
-def plot_coor_data(df_full, raw_coor_names, coor_names, datetime_name, filename = 'dataview_coor'):
+def plot_coor_data(df_coor, df_full, raw_coor_names, coor_names, datetime_name, filename = 'dataview_coor'):
     # print(df_full.columns)
     plot_functions.view_data(df_full, raw_coor_names, raw_coor_names, df_full[datetime_name].reset_index(drop=True), figname = filename)
-    plot_functions.view_data(df_full, coor_names, coor_names, df_full[datetime_name].reset_index(drop=True), figname = filename+'_scaled')
+    plot_functions.view_data(df_coor, coor_names, coor_names, df_full[datetime_name].reset_index(drop=True), figname = filename+'_scaled')
 
 def scale_corrdinates(df_full, fulldata_settings, doubletime_name, outputfilename, save_data = True, plot_data = True):       
     df_cos = df_full['mlt'].apply(lambda x: np.cos(x*np.pi/12.0))
@@ -71,13 +71,13 @@ def scale_corrdinates(df_full, fulldata_settings, doubletime_name, outputfilenam
     # df_coor = pd.DataFrame(np.array([df_full[doubletime_name],df_cos,df_sin,df_l,df_lat, df_full["mlt"], df_full["l"], df_full["lat"]]), columns=[doubletime_name, 'cos0','sin0','scaled_l','scaled-l', "mlt",'l','lat']).reset_index(drop=True)
     
     df_coor = pd.DataFrame({doubletime_name:df_full[doubletime_name],"cos0":df_cos, "sin0":df_sin, "scaled_l":df_l,"scaled_lat":df_lat })
-    df_coor = pd.concat([df_coor, df_full[["mlt",'l','lat']]], axis=1)
+    # df_coor = pd.concat([df_coor, df_full[["mlt",'l','lat']]], axis=1)
     
     if save_data:
         df_coor.to_csv(outputfilename + '.csv', index=False)
         
     if plot_data:            
-        plot_coor_data(df_coor, fulldata_settings["raw_coor_names"], fulldata_settings["coor_names"], fulldata_settings["datetime_name"], filename = outputfilename)
+        plot_coor_data(df_coor, df_full, fulldata_settings["raw_coor_names"], fulldata_settings["coor_names"], fulldata_settings["datetime_name"], filename = outputfilename)
         
     return df_coor, fulldata_settings
 
@@ -185,12 +185,6 @@ def scale_feature(df_feature, raw_feature_name, fulldata_settings, feature_filen
         
     return df_feature, fulldata_settings
 
-         
-# def plot_sw_data(df_full, plot_dir):
-#     time_array = df_full['Datetime'].astype('datetime64[ns]').reset_index(drop=True)
-
-#     plot_functions.view_data(df_full, ['swp',"scaled_swp",'swn','scaled_swn','swv','scaled_swv','by','scaled_by',"bz","scaled_bz"], ['SW P','scaled SW P','SW N','scaled SW N','SW V','scaled SW V','IMF By','scaled IMF By','IMF Bz','scaled IMF Bz'], time_array, figname = plot_dir + 'sw')
-
 # def create_features_history(df_full, fulldata_settings):
 #     # extract the length the parameters
 #     # m_coor = len(fulldata_settings["coor_names"])
@@ -269,14 +263,14 @@ def create_feature_history(df_feature, fulldata_settings, raw_feature_name, scal
             arr_history[:,ihf] = np.concatenate((np.full(int(index_difference*k), np.nan),  np.array(df_feature.loc[0:(index1-index_difference*k), scaled_feature_name])))
         
         ihf = ihf + 1
-        
-    df_history = pd.concat([df_feature[datetime_name], df_feature[raw_feature_name], pd.DataFrame(arr_history, columns=feature_history_names)],axis=1) 
-       
+    
+    df_history = pd.concat([df_feature[datetime_name], pd.DataFrame(arr_history, columns=feature_history_names)],axis=1)
+    
     if save_data:
         df_history.to_csv(feature_history_filename+ ".csv", index=False)
-
+    
     fulldata_settings["feature_history_names"] = feature_history_names
-    return df_history, fulldata_settings
+    return df_history[feature_history_names], fulldata_settings
 
 def load_features(directories, fulldataset_csv, fulldata_settings, recalc = False, df_full = [], save_data = False, plot_data = False, raw_feature_names = np.array(['symh','asyh','asyd','ae','f10.7','kp','swp','swn','swv','by','bz' ])):
     df_features_history = pd.DataFrame()
@@ -289,15 +283,8 @@ def load_features(directories, fulldataset_csv, fulldata_settings, recalc = Fals
 
         if os.path.exists(feature_history_filename+'.csv') & (recalc != True):
             print("Reading from "+feature_history_filename+'.csv')
-
-            print(feature_history_names.append(fulldata_settings["datetime_name"]))
             
-            idf_feature_history = pd.read_csv(feature_history_filename+'.csv', index_col=False, usecols=feature_history_names.append(fulldata_settings["datetime_name"]))
-            
-            print(idf_feature_history.columns)
-
-            # if 'df_features_history' not in locals():
-            #     df_features_history = pd.read_csv(feature_history_filename+'.csv', index_col=False, usecols=[fulldata_settings["datetime_name"]])
+            idf_feature_history = pd.read_csv(feature_history_filename+'.csv', index_col=False, usecols=feature_history_names, low_memory=False, dtype = 'float64')
         else:        
             print("Calculate the feature history of " + raw_feature_name)
             if len(df_full) == 0:
@@ -305,24 +292,16 @@ def load_features(directories, fulldataset_csv, fulldata_settings, recalc = Fals
             idf_feature = df_full[[fulldata_settings["datetime_name"], raw_feature_name]]
             
             idf_feature, fulldata_settings = scale_feature(idf_feature, raw_feature_name, fulldata_settings, feature_history_filename, plot_data = plot_data)
-                
+            
             idf_feature_history, fulldata_settings = create_feature_history(idf_feature, fulldata_settings,raw_feature_name, "scaled_"+raw_feature_name, feature_history_filename, fulldata_settings["datetime_name"], save_data = save_data)
             
-            # if 'df_features_history' not in locals():
-            #     df_features_history = idf_feature_history[fulldata_settings["datetime_name"]]
-            print(idf_feature_history.columns)
-            
-            # idf_feature_history = pd.concat(idf_feature[raw_feature_name], idf_feature_history[feature_history_names], axis=1)
-
-        df_features_history = pd.concat([df_features_history, idf_feature_history.drop(fulldata_settings["datetime_name"],axis=1)], axis=1)
-        
-    df_features_history = pd.concat([idf_feature[fulldata_settings["datetime_name"]], df_features_history], axis=1)
-        
-    fulldata_settings["feature_history_names"] = fulldata_settings["feature_history_names"] + feature_history_names
+        df_features_history[feature_history_names] = idf_feature_history
+        fulldata_settings["feature_history_names"] = fulldata_settings["feature_history_names"] + feature_history_names
         
     return df_features_history, df_full, fulldata_settings
 
 def load_fulldata(energy =(np.array([51767.680, 44428.696, 38130.120, 32724.498, 28085.268, 24103.668, 20686.558, 17753.876, 15236.896, 13076.798, 11222.936, 9631.899, 8266.406, 7094.516, 6088.722, 5225.528, 4484.742, 3848.919, 3303.284, 2834.964, 2433.055, 2088.129, 1792.096, 1538.062, 1319.977, 1132.846, 972.237, 834.421, 716.163, 614.578, 527.484, 452.702, 388.543, 333.459, 286.184, 245.592, 210.769, 180.870, 155.262, 133.243, 114.319, 98.138, 84.209, 72.320, 62.049, 53.255, 45.728, 39.185, 33.627, 28.914, 24.763, 21.246, 18.291, 15.688, 13.437, 11.537, 9.919, 8.512, 7.316, 6.261, 5.347, 4.643, 3.940, 3.377, 2.955, 2.533, 2.181, 1.829, 1.548, 1.337, 1.196, 0.985]) * 1000.).astype(int).astype(str), species = ['h','o'], recalc = False, release = 'rel05', average_time = 300, raw_coor_names = ["mlt","l","lat"], coor_names=["cos0", 'sin0', 'scaled_lat','scaled_l'], raw_feature_names = ['symh','asyh','asyd','ae','f10.7','kp','swp','swn','swv','by','bz'], number_history = 30, history_resolution = 2*3600., save_data = False, plot_data = False, df_full = []):
+    
     """ main function to load full data.
 
     Args:
@@ -354,18 +333,9 @@ def load_fulldata(energy =(np.array([51767.680, 44428.696, 38130.120, 32724.498,
     
     df_y, df_full, fulldata_settings = load_y(directories, fulldataset_csv, fulldata_settings, recalc = recalc, df_full = df_full, save_data = save_data, plot_data = plot_data, energy_bins = energy, species_arr = species)
 
-    df_features_history, df_full, fulldata_settings = load_features(directories, fulldataset_csv, fulldata_settings, recalc = recalc, df_full = df_full, save_data = save_data, plot_data = plot_data, raw_feature_names = raw_feature_names)
+    df_features_history, df_full, fulldata_settings = load_features(directories, fulldataset_csv, fulldata_settings, recalc = recalc, df_full = df_full, save_data = save_data, plot_data = plot_data, raw_feature_names = raw_feature_names)   
     
-    print(fulldata_settings['raw_feature_names'])
-    print(fulldata_settings['feature_history_names'])
-    print(df_coor[fulldata_settings['feature_history_names']])
-
-    # print(df_full[fulldata_settings['raw_feature_names']])
-    
-    
-    
-    
-    df_data = pd.concat([df_y[fulldata_settings["datetime_name"]], df_y[fulldata_settings['log_y_names']],fulldata_settings['y_names'], df_coor[fulldata_settings['raw_coor_names']],[fulldata_settings['coor_names']], df_full[fulldata_settings['raw_feature_names']], df_features_history[fulldata_settings['feature_history_names']]], axis=1)
+    df_data = pd.concat([df_y, df_coor[fulldata_settings['coor_names']], df_features_history[fulldata_settings['feature_history_names']]], axis=1)
     
     return df_data, directories, fulldataset_csv, fulldata_settings
 

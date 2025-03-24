@@ -27,7 +27,7 @@ tf.random.set_seed(random_seed)
 np.random.seed(random_seed)
 np.set_printoptions(precision=4)
 
-def plot_test_heatmap(energy, species, recalc = False, plot_data = False, save_data = True, release = 'rel05', dL01=True,coor_names=["cos0", 'sin0', 'scaled_lat','scaled_l'], feature_names=[ 'scaled_symh', 'scaled_ae','scaled_asyh', 'scaled_asyd'], forecast = False, number_history = 7):
+def plot_test_heatmap(energy, species, recalc = False, plot_data = False, save_data = True, release = 'rel05', dL01=True,coor_names=["cos0", 'sin0', 'scaled_lat','scaled_l'], feature_names=[ 'scaled_symh', 'scaled_ae','scaled_asyh', 'scaled_asyd'], forecast = "none", number_history = 7):
     directories, dataset_csv, data_settings = prepare_ml_dataset.initializ_var(energy, species, release = release, dL01=dL01, feature_names=feature_names, forecast = forecast, number_history = number_history)
     
     x_test, y_test = prepare_ml_dataset.load_test_data(dataset_csv)
@@ -38,7 +38,7 @@ def plot_test_heatmap(energy, species, recalc = False, plot_data = False, save_d
     
     plot_functions.plot_correlation_heatmap(y_test, y_test_pred, xrange=[1,8], figname = directories["result_dir"] + data_settings["y_name_log"]+'_test_r2')
 
-def plot_test_tplot(energy, species, release = 'rel05', dL01=True, feature_names=[ 'scaled_symh', 'scaled_ae','scaled_asyh', 'scaled_asyd'], forecast = False, number_history = 7):
+def plot_test_tplot(energy, species, release = 'rel05', dL01=True, feature_names=[ 'scaled_symh', 'scaled_ae','scaled_asyh', 'scaled_asyd'], forecast = "none", number_history = 7):
     """
         The following sections are to visulize the long-term variation of modeled proton flux
     """

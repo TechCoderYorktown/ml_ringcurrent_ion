@@ -15,6 +15,7 @@ Examples
 import os
 import pickle
 import numpy as np
+import json
 
 def create_y_name(energy, species, property = 'flux'):
     return species + '_'+property+'_' + energy
@@ -52,12 +53,16 @@ def initialize_fulldatacsv(directories):
     
 def initialize_datacsv(directories, species, energy, number_history):    
     dataset_csv = {
-        "x_train" : directories["ml_data"] + species+'_'+energy + '_' + str(number_history) + 'days_' + "x_train.csv",
-        "y_train" : directories["ml_data"] + species+'_'+energy + '_' + str(number_history) + 'days_' + "y_train.csv",
-        "x_valid" : directories["ml_data"] + species+'_'+energy + '_' + str(number_history) + 'days_' + "x_valid.csv",
-        "y_valid" : directories["ml_data"] + species+'_'+energy + '_' + str(number_history) + 'days_' + "y_valid.csv",
-        "x_test"  : directories["ml_data"] + species+'_'+energy + '_' + str(number_history) + 'days_' + "x_test.csv",
-        "y_test"  : directories["ml_data"] + species+'_'+energy + '_' + str(number_history) + 'days_' + "y_test.csv" 
+        "df_y"    : directories["ml_data"] + species+'_'+energy + '_' + 'days_' + "df_y.csv",
+        "df_coor" : directories["ml_data"] + "df_coor.csv",
+        "df_feature" : directories["ml_data"] + "df_features.csv",
+        "df_data" : directories["ml_data"] + species+'_'+energy + '_' +  "df_data.csv",
+        "x_train" : directories["ml_data"] + species+'_'+energy + '_' + "x_train.csv",
+        "y_train" : directories["ml_data"] + species+'_'+energy + '_' +"y_train.csv",
+        "x_valid" : directories["ml_data"] + species+'_'+energy + '_' +  "x_valid.csv",
+        "y_valid" : directories["ml_data"] + species+'_'+energy + '_' + "y_valid.csv",
+        "x_test"  : directories["ml_data"] + species+'_'+energy + '_' + "x_test.csv",
+        "y_test"  : directories["ml_data"] + species+'_'+energy + '_' + "y_test.csv" 
         } 
     return dataset_csv
     
@@ -98,7 +103,7 @@ def initialize_fulldata_settings(release, average_time, raw_coor_names,  coor_na
     
     return fulldata_settings
 
-def initialize_data_settings(energy , species, number_history, raw_feature_names, dL01, forecast, l_min = 2, l_max = 8, rel05_invalid_time = ['2017-10-29', '2017-11-01']):
+def initialize_data_settings(energy , species, number_history, raw_feature_names, dL01, forecast, l_min = 1, l_max = 8, rel05_invalid_time = ['2017-10-29', '2017-11-01'], test_ts = '2017-01-01', test_te = '2018-01-01'):
     y_name =  create_y_name(energy, species)
     log_y_name = create_log_y_name(energy, species)
     
@@ -114,7 +119,9 @@ def initialize_data_settings(energy , species, number_history, raw_feature_names
         "rel05_invalid_time": rel05_invalid_time,
         "y_name":y_name,
         "log_y_name":log_y_name,
-        "forecast" : forecast
+        "forecast" : forecast,
+        "test_ts" : test_ts,
+        "test_te" : test_te
     }
     
     return data_settings
@@ -142,19 +149,29 @@ def initialize_fulldata_var(release= 'rel05', average_time = 300, raw_coor_names
 
     fulldata_settings = initialize_fulldata_settings(release, average_time, raw_coor_names,  coor_names, raw_feature_names, number_history, history_resolution, energy, species)
     
-    with open(fulldataset_csv["fulldata_settings_filename"]+'.pkl', 'wb') as file:
-        pickle.dump(fulldata_settings, file)
+    # with open(fulldataset_csv["fulldata_settings_filename"]+'.pkl', 'wb') as file:
+    #     pickle.dump(fulldata_settings, file)
+    
+    with open(fulldataset_csv["fulldata_settings_filename"]+'.json', 'w') as file:
+        json.dump(fulldata_settings, file, indent = 4)
     
     return directories, fulldataset_csv, fulldata_settings
 
-def initialize_data_var(energy, species, raw_feature_names, number_history, dL01, forecast):
+def initialize_data_var(energy, species, raw_feature_names, number_history, dL01, forecast, test_ts = '2017-01-01', test_te = '2018-01-01'):
     directories, fulldataset_csv, fulldata_settings = initialize_fulldata_var(raw_feature_names = raw_feature_names, number_history=number_history)   
+    
+    for raw_feature_name in raw_feature_names:
+        directories["ml_data"] = directories["ml_data"] + raw_feature_name + '_'
+        
+    directories["ml_data"]  = directories["ml_data"] + "history" + str(number_history) + "days_dL01" + str(dL01) + "_forecast" + forecast +'/'
+    create_directories(directories.values())
+    # print(directories["ml_data"])
     
     dataset_csv = initialize_datacsv(directories = directories, species = species, energy =energy, number_history =number_history)   
 
-    data_settings = initialize_data_settings(energy , species, number_history, raw_feature_names, dL01, forecast)
-                
-    return dataset_csv, data_settings
+    data_settings = initialize_data_settings(energy=energy , species=species, number_history=number_history, raw_feature_names=raw_feature_names, dL01=dL01, forecast=forecast, test_ts = test_ts, test_te = test_te)
+            
+    return dataset_csv, data_settings, directories
 
 def initialize_model_var(layer, n_neurons, dropout_rate,patience, learning_rate, epochs,  batch_size, energy , species, release, average_time, raw_coor_names,  coor_names, raw_feature_names, number_history, history_resolution):
     

@@ -27,13 +27,15 @@ def scale_arr_with_input(arr, mid_value, scale_value):
 
 
 def view_data(df_full, varnames, ylabels, time_array, figname ='temp'):
-
+    print("start viewdata")
     nvar = len(varnames)
 
     fig1, ax1 = plt.subplots(nvar,1, constrained_layout = True)
     fig1.set_size_inches(8, nvar*2)
     
     for ivar in range(len(varnames)):
+        print("start plot " + ivar)
+
         varname = varnames[ivar]
         ax1[ivar].scatter(time_array,df_full[varname],s = 0.1)
         ax1[ivar].set_ylabel(ylabels[ivar])
@@ -96,7 +98,7 @@ def plot_correlation_heatmap(y_test_reshaped, y_test_pred_reshaped, xrange=[4,9]
     grid=0.05 
     
     yrange, yrangeup, yrangelow = factor_line_calculation(xrange, 2)
-
+    
     NX=int((xrange[1]-xrange[0])/grid)
     NY=int((yrange[1]-yrange[0])/grid)
     M_test=np.zeros([NX,NY],dtype=np.int16)
