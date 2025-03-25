@@ -237,7 +237,7 @@ def prepare_ml_dataset(energy, species, recalc = False, plot_data = False, save_
     if os.path.exists(dataset_csv["x_train"]) & (recalc != True):
         x_train, x_valid, x_test, y_train, y_valid, y_test  = load_csv_data(dataset_csv)
     else:
-        df_data, directories, fulldataset_csv, fulldata_settings = prepare_fulldata.load_fulldata(energy, species, recalc = recalc, raw_feature_names = raw_feature_names, number_history = number_history, save_data = save_data, plot_data = plot_data)
+        df_data, directories, fulldataset_csv, fulldata_settings = prepare_fulldata.load_fulldata(energy, species, recalc = False, raw_feature_names = raw_feature_names, number_history = number_history, save_data = save_data, plot_data = plot_data)
         
         df_full = prepare_fulldata.read_probes_data(directories["rawdata_dir"], fulldata_settings)
         
@@ -283,14 +283,11 @@ def prepare_ml_dataset(energy, species, recalc = False, plot_data = False, save_
         
     return x_train, x_valid, x_test, y_train, y_valid, y_test       
 
-def prepare_ml_dataset_batch():
-    raw_feature_names =  ['symh','asyh','ae','asyd'] #['symh','asyh','asyd','ae','f10.7','kp','swp','swn','swv','by','bz']
+def prepare_ml_dataset_batch(raw_feature_names =  ['symh','asyh','ae','asyd'] , number_history_arr = [7,8],forecast_arr = ["all", "index","none"],dL01_arr = [True, False],  species_arr = ['h', 'o'],energy_arr = ['972237', '51767680']   ):
+    '''
+        raw_feature_names:    #['symh','asyh','asyd','ae','f10.7','kp','swp','swn','swv','by','bz']
 
-    number_history_arr = [7,8]
-    forecast_arr = ["all", "index","none"]
-    dL01_arr = [True, False]
-    species_arr = ['h', 'o']
-    energy_arr = ['972237', '51767680']  
+    '''
 
     for number_history in number_history_arr:
         for forecast in forecast_arr:
