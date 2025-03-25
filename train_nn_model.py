@@ -34,7 +34,7 @@ tf.random.set_seed(random_seed)
 np.random.seed(random_seed)
 np.set_printoptions(precision=4)
 
-def nn_model(x_train, y_train, x_valid, y_valid, y_name, output_dir = 'training/', model_fln = '', mse_fln = '', extra_str = '',n_neurons = 15, dropout_rate = 0.0, patience = 32,learning_rate = 1e-3, epochs = 200, batch_size = 32, dL01 = True):
+def nn_model(x_train, y_train, x_valid, y_valid, y_name, output_dir = 'training/', model_fln = '', mse_fln = '', extra_str = '',n_neurons = 15, dropout_rate = 0.0, patience = 32,learning_rate = 1e-3, epochs = 200, batch_size = 32, dL01 = True, nlayer = 3):
     
     loss_function = "mean_squared_error"
     optimizer = tf.keras.optimizers.SGD(learning_rate = learning_rate) #Adam(learning_rate = learning_rate)) 
@@ -43,15 +43,28 @@ def nn_model(x_train, y_train, x_valid, y_valid, y_name, output_dir = 'training/
     
     callback  =  tf.keras.callbacks.EarlyStopping(monitor = 'val_loss', patience = patience)
 
-    model = tf.keras.models.Sequential([
-        tf.keras.layers.Input(x_train.shape[1:]), 
-        tf.keras.layers.Dense(units = n_neurons, activation = "relu"), # , kernel_regularizer = tf.keras.regularizers.L2(0.01)),
-        # Dropout(0.5),
-        tf.keras.layers.Dense(units = n_neurons, activation = "relu"),
-        tf.keras.layers.Dense(units = n_neurons, activation = "relu"),
-#       tf.keras.layers.Dense(units = n_neurons, activation = "relu"),
-        tf.keras.layers.Dense(1)
-    ])
+    nlayer = nlayer
+
+    if nlayer == 3:
+        model = tf.keras.models.Sequential([
+            tf.keras.layers.Input(x_train.shape[1:]), 
+            tf.keras.layers.Dense(units = n_neurons, activation = "relu"), # , kernel_regularizer = tf.keras.regularizers.L2(0.01)),
+            # Dropout(0.5),
+            tf.keras.layers.Dense(units = n_neurons, activation = "relu"),
+            tf.keras.layers.Dense(units = n_neurons, activation = "relu"),
+    #       tf.keras.layers.Dense(units = n_neurons, activation = "relu"),
+            tf.keras.layers.Dense(1)
+        ])
+    if nlayer == 4:
+        model = tf.keras.models.Sequential([
+            tf.keras.layers.Input(x_train.shape[1:]), 
+            tf.keras.layers.Dense(units = n_neurons, activation = "relu"), # , kernel_regularizer = tf.keras.regularizers.L2(0.01)),
+            # Dropout(0.5),
+            tf.keras.layers.Dense(units = n_neurons, activation = "relu"),
+            tf.keras.layers.Dense(units = n_neurons, activation = "relu"),
+            tf.keras.layers.Dense(units = n_neurons, activation = "relu"),
+            tf.keras.layers.Dense(1)
+        ])
     
     print(model.summary())
     
@@ -80,10 +93,25 @@ def nn_model(x_train, y_train, x_valid, y_valid, y_name, output_dir = 'training/
 
     return model, history,valid_r2
 
-def train_nn_model(energy, species, recalc = False, plot_data = False, save_data = False, dL01=True, raw_feature_names=['symh','asyh','ae','asyd'], forecast = "none", number_history = 7):
+def train_nn_model(energy, species, recalc = False, plot_data = False, save_data = True, dL01=True, raw_feature_names=['symh','asyh','ae','asyd'], forecast = "none", number_history = 7, nlayer = 3):
+    
+    '''
+    train_nn_model is routine to train a nn model.
+    
+    raw_feature_names: ['symh','asyh','asyd','ae','f10.7','kp','swp','swn','swv','by','bz']
+    forecast: ["all", "index","none"]
+    number_history : [7,8] # or any number
+    energy : [51767.680, 44428.696, 38130.120, 32724.498, 28085.268, 24103.668, 20686.558, 17753.876, 15236.896, 13076.798, 11222.936, 9631.899, 8266.406, 7094.516, 6088.722, 5225.528, 4484.742, 3848.919, 3303.284, 2834.964, 2433.055, 2088.129, 1792.096, 1538.062, 1319.977, 1132.846, 972.237] * 1000
+    species : 'h', 'o'
+    dL01_arr = [True, False]
+    
+    '''
 
-    dataset_csv, data_settings, directories = initialize_var.initialize_data_var(energy=energy, species=species, raw_feature_names = raw_feature_names, forecast = forecast, number_history = number_history, dL01=dL01)
 
+    np.set_printoptions(precision=4)
+    
+    dataset_csv, data_settings, directories = initialize_var.initialize_data_var(energy=energy, species=species, raw_feature_names = raw_feature_names, forecast = forecast, number_history = number_history, dL01=dL01, learning_rate = 1.e-3,)
+    
     x_train, x_valid, x_test, y_train, y_valid, y_test = prepare_ml_dataset.prepare_ml_dataset(energy, species, recalc = recalc, plot_data = plot_data, save_data = save_data, dL01=dL01, raw_feature_names = raw_feature_names,  forecast = forecast, number_history = number_history)
     
     has_nan = np.any(np.isnan(x_train)) | np.any(np.isnan(x_valid)) | np.any(np.isnan(x_test)) | np.any(np.isnan(y_train)) | np.any(np.isnan(y_valid)) | np.any(np.isnan(y_test)) 
@@ -104,7 +132,7 @@ def train_nn_model(energy, species, recalc = False, plot_data = False, save_data
     for ipara in range(len(para_set)):
         parameter = para_set[ipara]
 
-        model, history, valid_r2 = nn_model(x_train, y_train, x_valid, y_valid, data_settings["log_y_name"], output_dir = directories["training_output_dir"] , model_fln = '', mse_fln = '', n_neurons = 18, dropout_rate = 0.0, patience = 32, learning_rate = parameter, epochs = 2, batch_size = 8, dL01= dL01)
+        model, history, valid_r2 = nn_model(x_train, y_train, x_valid, y_valid, data_settings["log_y_name"], output_dir = directories["training_output_dir"] , model_fln = '', mse_fln = '', n_neurons = 18, dropout_rate = 0.0, patience = 32, learning_rate = parameter, epochs = 2, batch_size = 8, dL01= dL01, nlayer= nlayer)
         
         
         
