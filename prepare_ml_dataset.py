@@ -272,13 +272,15 @@ def prepare_ml_dataset(energy, species, recalc = False, plot_data = False, save_
 
             save_csv_data(x_train, x_valid, x_test, y_train, y_valid, y_test , dataset_csv)
             
+        print("start plot data") 
+        
         if plot_data:
             plot_y_data(df_data.loc[index_good, [ fulldata_settings['datetime_name'],  data_settings["y_name"],data_settings["log_y_name"]]], data_settings["y_name"],data_settings["log_y_name"],  fulldata_settings['datetime_name'], fulldataset_csv["df_y"]+ data_settings["log_y_name"])
             
             plot_coor_data(df_data.loc[index_good, [fulldata_settings['datetime_name'],fulldata_settings["coor_names"]  ]], fulldata_settings["coor_names"],  fulldata_settings['datetime_name'], fulldataset_csv["df_coor"])
                         
             plot_feature_data(df_data.loc[index_good, [fulldata_settings['datetime_name'],fulldata_settings["feature_names"] ]], fulldata_settings["feature_names"],  fulldata_settings['datetime_name'], fulldataset_csv["df_coor"])
-            
+        
     return x_train, x_valid, x_test, y_train, y_valid, y_test       
 
 def __main__():

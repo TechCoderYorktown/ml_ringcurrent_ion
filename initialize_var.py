@@ -29,7 +29,7 @@ def initialize_dir(release):
     directories = {
         "rawdata_dir" : path + "rawdata/", 
         "fulldata_dir" : path + "fulldata/",
-        # "data_view_dir" : path + "data_view/",
+        "data_view_dir" : path + "data_view/",
         "training_output_dir" : path + "training/", 
         "model_setting_compare_dir" : path + "model_setting_compare/"  ,
         "ml_data" : path + "ml_data/", 
