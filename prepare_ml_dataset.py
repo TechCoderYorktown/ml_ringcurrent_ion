@@ -228,7 +228,7 @@ def save_df_data(df_data,  index_train, index_valid, index_test, dataset_csv):
     df_data.to_csv(dataset_csv["df_data"], index=False)
     return True
 
-def prepare_ml_dataset(energy, species, recalc = False, plot_data = False, save_data = True, dL01=True, average_time = 300, raw_feature_names = ['symh','asyh','asyd','ae','f10.7','kp','swp','swn','swv','by','bz'],  forecast = "none", number_history = 7, test_ts = '2017-01-01', test_te = '2018-01-01'):
+def load_ml_dataset(energy, species, recalc = False, plot_data = False, save_data = True, dL01=True, average_time = 300, raw_feature_names = ['symh','asyh','asyd','ae','f10.7','kp','swp','swn','swv','by','bz'],  forecast = "none", number_history = 7, test_ts = '2017-01-01', test_te = '2018-01-01'):
     
     np.set_printoptions(precision=4)
     
@@ -294,7 +294,7 @@ def prepare_ml_dataset_batch(raw_feature_names =  ['symh','asyh','ae','asyd'] , 
             for dL01 in dL01_arr:
                 for species in species_arr:
                     for energy in energy_arr:
-                        prepare_ml_dataset(energy, species, recalc = True, plot_data = True, save_data = True, dL01=dL01, forecast = forecast, number_history =number_history,raw_feature_names =  raw_feature_names)
+                        load_ml_dataset(energy, species, recalc = True, plot_data = True, save_data = True, dL01=dL01, forecast = forecast, number_history =number_history,raw_feature_names =  raw_feature_names)
 
 def __main__():
     if __name__ == "__name__":
