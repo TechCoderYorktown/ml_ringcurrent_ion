@@ -208,17 +208,17 @@ def print_model(self):
 def plot_y_data(df_y, y_name,log_y_name, datetime_name, filename):  
     print("start plot y data")    
          
-    plot_functions.view_data(df_y, [y_name,log_y_name], [y_name,log_y_name], df_y[datetime_name].reset_index(drop=True), figname = filename)
+    plot_functions.view_data(df_y, [y_name,log_y_name], [y_name,log_y_name], df_y[datetime_name].astype('datetime64[ns]').reset_index(drop=True), figname = filename)
 
 def plot_coor_data(df_coor,  coor_names, datetime_name, filename):
     print("start plot coor data")         
 
-    plot_functions.view_data(df_coor,  coor_names, coor_names, df_coor[datetime_name].reset_index(drop=True),  figname = filename)
+    plot_functions.view_data(df_coor,  coor_names, coor_names, df_coor[datetime_name].astype('datetime64[ns]').reset_index(drop=True),  figname = filename)
     
 def plot_feature_data(df_feature, scaled_feature_names, datetime_name, filename):
     print("start plot feature data")         
 
-    plot_functions.view_data(df_feature,  scaled_feature_names, scaled_feature_names, df_feature[datetime_name].reset_index(drop=True),  figname = filename)
+    plot_functions.view_data(df_feature,  scaled_feature_names, scaled_feature_names, df_feature[datetime_name].astype('datetime64[ns]').reset_index(drop=True),  figname = filename)
 
 def save_df_data(df_data,  index_train, index_valid, index_test, dataset_csv):
     df_data["index_train"] = index_train
@@ -242,9 +242,7 @@ def load_ml_dataset(energy, species, recalc = False, plot_data = False, save_dat
         df_full = prepare_fulldata.read_probes_data(directories["rawdata_dir"], fulldata_settings)
         
         df_data[[fulldata_settings['doubletime_name']]] = df_full[[fulldata_settings['doubletime_name']]]
-        
-        # df_data[[fulldata_settings['doubletime_name']]+fulldata_settings["raw_coor_names"]+ fulldata_settings["raw_feature_names"]] = df_full[[fulldata_settings['doubletime_name']]+fulldata_settings["raw_coor_names"]+ fulldata_settings["raw_feature_names"]]
-        
+                
         index_good = get_good_index(df_full, data_settings, fulldata_settings)
 
         if data_settings["forecast"] == "all":
@@ -258,6 +256,9 @@ def load_ml_dataset(energy, species, recalc = False, plot_data = False, save_dat
 
         df_full = df_full.loc[index_good, :]
 
+        #-----------------------------
+        # After this line, both df_data and df_full only have good data. no index_good should be used.
+
         #set test set. Here we use one year (2017) of data for test set 
         index_train, index_valid, index_test = create_ml_indexes(df_data,  fulldata_settings, data_settings["test_ts"], data_settings["test_te"])
         
@@ -268,18 +269,18 @@ def load_ml_dataset(energy, species, recalc = False, plot_data = False, save_dat
         print(x_train.shape, x_valid.shape, x_test.shape, y_train.shape, y_valid.shape, y_test.shape)
 
         if save_data:
-            save_df_data(df_full.loc[index_good, [fulldata_settings['datetime_name'], data_settings["y_name"]] + fulldata_settings["raw_coor_names"] + fulldata_settings["raw_feature_names"]], index_train, index_valid, index_test, dataset_csv)
+            save_df_data(df_full[[fulldata_settings['datetime_name'], data_settings["y_name"]] + fulldata_settings["raw_coor_names"] + fulldata_settings["raw_feature_names"]], index_train, index_valid, index_test, dataset_csv)
 
             save_csv_data(x_train, x_valid, x_test, y_train, y_valid, y_test , dataset_csv)
             
         if plot_data:
             print("start plot data") 
 
-            plot_y_data(df_data.loc[index_good, [ fulldata_settings['datetime_name'],  data_settings["y_name"],data_settings["log_y_name"]]], data_settings["y_name"],data_settings["log_y_name"],  fulldata_settings['datetime_name'], fulldataset_csv["df_y"]+ data_settings["log_y_name"])
+            plot_y_data(df_data[[ fulldata_settings['datetime_name'],  data_settings["y_name"],data_settings["log_y_name"]]], data_settings["y_name"],data_settings["log_y_name"],  fulldata_settings['datetime_name'], dataset_csv["df_y"]+ data_settings["log_y_name"])
             
-            plot_coor_data(df_data.loc[index_good, [fulldata_settings['datetime_name'],fulldata_settings["coor_names"]  ]], fulldata_settings["coor_names"],  fulldata_settings['datetime_name'], fulldataset_csv["df_coor"])
+            plot_coor_data(df_data[ [fulldata_settings['datetime_name'],fulldata_settings["coor_names"]  ]], fulldata_settings["coor_names"],  fulldata_settings['datetime_name'], dataset_csv["df_coor"])
                         
-            plot_feature_data(df_data.loc[index_good, [fulldata_settings['datetime_name'],fulldata_settings["feature_names"] ]], fulldata_settings["feature_names"],  fulldata_settings['datetime_name'], fulldataset_csv["df_coor"])
+            plot_feature_data(df_data[ [fulldata_settings['datetime_name'],fulldata_settings["feature_names"] ]], fulldata_settings["feature_names"],  fulldata_settings['datetime_name'], dataset_csv["df_coor"])
         
     return x_train, x_valid, x_test, y_train, y_valid, y_test       
 

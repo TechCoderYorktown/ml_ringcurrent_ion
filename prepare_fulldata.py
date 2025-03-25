@@ -60,8 +60,8 @@ def read_probes_data(data_dir, fulldata_settings):
 
 def plot_coor_data(df_coor, df_full, raw_coor_names, coor_names, datetime_name, filename = 'dataview_coor'):
     # print(df_full.columns)
-    plot_functions.view_data(df_full, raw_coor_names, raw_coor_names, df_full[datetime_name].reset_index(drop=True), figname = filename)
-    plot_functions.view_data(df_coor, coor_names, coor_names, df_full[datetime_name].reset_index(drop=True), figname = filename+'_scaled')
+    plot_functions.view_data(df_full, raw_coor_names, raw_coor_names, df_full[datetime_name].astype('datetime64[ns]').reset_index(drop=True), figname = filename)
+    plot_functions.view_data(df_coor, coor_names, coor_names, df_full[datetime_name].astype('datetime64[ns]').reset_index(drop=True), figname = filename+'_scaled')
 
 def scale_corrdinates(df_full, fulldata_settings, doubletime_name, outputfilename, save_data = True, plot_data = True):       
     df_cos = df_full['mlt'].apply(lambda x: np.cos(x*np.pi/12.0))
@@ -97,7 +97,7 @@ def load_coor(directories, fulldataset_csv, fulldata_settings, recalc = False, d
     return df_coor, df_full, fulldata_settings
 
 def plot_y_data(df_full, y_names, datetime_name, filename = 'dataview_y'):
-    plot_functions.view_data(df_full, y_names, y_names,  df_full[datetime_name].reset_index(drop=True), figname = filename)
+    plot_functions.view_data(df_full, y_names, y_names,  df_full[datetime_name].astype('datetime64[ns]').reset_index(drop=True), figname = filename)
 
 def calculate_log_for_y(df_y, y_name, fulldata_settings, log_y_filename, datetime_name, save_data = True, plot_data = True):
     log_y_name = "log_"+y_name
@@ -174,7 +174,7 @@ def create_feature_history_names(fulldata_settings, scaled_feature_name):
 
 def plot_feature_data(df_feature, raw_feature_names,  scaled_raw_feature_names, datetime_name, filename):   
     
-    plot_functions.view_data(df_feature, [raw_feature_names, scaled_raw_feature_names], [raw_feature_names, scaled_raw_feature_names], df_feature[datetime_name].reset_index(drop=True), figname = filename)
+    plot_functions.view_data(df_feature, [raw_feature_names, scaled_raw_feature_names], [raw_feature_names, scaled_raw_feature_names], df_feature[datetime_name].astype('datetime64[ns]').reset_index(drop=True), figname = filename)
 
 def scale_feature(df_feature, raw_feature_name, fulldata_settings, feature_filename, plot_data = True): 
     scaled_feature_name = "scaled_"+raw_feature_name
