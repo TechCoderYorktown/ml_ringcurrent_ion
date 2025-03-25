@@ -181,24 +181,18 @@ def save_csv_data(x_train, x_valid, x_test, y_train, y_valid, y_test, dataset_cs
     # pd.DataFrame(y_test).to_csv(dataset_csv["y_test"], index=False) 
 
 def load_csv_data(dataset_csv):
-    # x_train = pd.read_csv(dataset_csv["x_train"], index_col=False)
-    # y_train = pd.read_csv(dataset_csv["y_train"], index_col=False)
-    # x_valid = pd.read_csv(dataset_csv["x_valid"], index_col=False)
-    # y_valid = pd.read_csv(dataset_csv["y_valid"], index_col=False)
-    # x_test = pd.read_csv(dataset_csv["x_test"], index_col=False)
-    # y_test = pd.read_csv(dataset_csv["y_test"], index_col=False)
-
-    # Using numpy.loadtxt()
-    # x_train = np.loadtxt(dataset_csv["x_train"], delimiter=',')
-
-    # Using numpy.genfromtxt()
     x_train = np.genfromtxt(dataset_csv["x_train"], delimiter=',', dtype='float32')
     x_valid = np.genfromtxt(dataset_csv["x_valid"], delimiter=',', dtype='float32')
     x_test = np.genfromtxt(dataset_csv["x_test"], delimiter=',', dtype='float32')
     y_train = np.genfromtxt(dataset_csv["y_train"], delimiter=',', dtype='float32')
     y_valid = np.genfromtxt(dataset_csv["y_valid"], delimiter=',', dtype='float32')
     y_test = np.genfromtxt(dataset_csv["y_test"], delimiter=',', dtype='float32')
-
+    # x_train = pd.read_csv(dataset_csv["x_train"], index_col=False)
+    # y_train = pd.read_csv(dataset_csv["y_train"], index_col=False)
+    # x_valid = pd.read_csv(dataset_csv["x_valid"], index_col=False)
+    # y_valid = pd.read_csv(dataset_csv["y_valid"], index_col=False)
+    # x_test = pd.read_csv(dataset_csv["x_test"], index_col=False)
+    # y_test = pd.read_csv(dataset_csv["y_test"], index_col=False)
     return x_train, x_valid, x_test, y_train, y_valid, y_test
 
 def load_test_data(dataset_csv):

@@ -93,8 +93,8 @@ def nn_model(x_train, y_train, x_valid, y_valid, y_name, output_dir = 'training/
 
     return model, history,valid_r2
 
-def train_nn_model(energy, species, recalc = False, plot_data = False, save_data = True, dL01=True, raw_feature_names=['symh','asyh','ae','asyd'], forecast = "none", number_history = 7, nlayer = 3):
-    
+def train_nn_model(energy, species, recalc = False, plot_data = False, save_data = True, dL01=True, raw_feature_names=['symh','asyh','ae','asyd'], forecast = "none", number_history = 7, nlayer = 3, learning_rate = 1.e-3, n_neurons = 18, dropout_rate = 0.0, patience = 32,epochs = 2, batch_size = 8 ):
+        
     '''
     train_nn_model is routine to train a nn model.
     
@@ -110,7 +110,7 @@ def train_nn_model(energy, species, recalc = False, plot_data = False, save_data
 
     np.set_printoptions(precision=4)
     
-    dataset_csv, data_settings, directories = initialize_var.initialize_data_var(energy=energy, species=species, raw_feature_names = raw_feature_names, forecast = forecast, number_history = number_history, dL01=dL01, learning_rate = 1.e-3,)
+    dataset_csv, data_settings, directories = initialize_var.initialize_data_var(energy=energy, species=species, raw_feature_names = raw_feature_names, forecast = forecast, number_history = number_history, dL01=dL01)
     
     x_train, x_valid, x_test, y_train, y_valid, y_test = prepare_ml_dataset.prepare_ml_dataset(energy, species, recalc = recalc, plot_data = plot_data, save_data = save_data, dL01=dL01, raw_feature_names = raw_feature_names,  forecast = forecast, number_history = number_history)
     
@@ -132,9 +132,7 @@ def train_nn_model(energy, species, recalc = False, plot_data = False, save_data
     for ipara in range(len(para_set)):
         parameter = para_set[ipara]
 
-        model, history, valid_r2 = nn_model(x_train, y_train, x_valid, y_valid, data_settings["log_y_name"], output_dir = directories["training_output_dir"] , model_fln = '', mse_fln = '', n_neurons = 18, dropout_rate = 0.0, patience = 32, learning_rate = parameter, epochs = 2, batch_size = 8, dL01= dL01, nlayer= nlayer)
-        
-        
+        model, history, valid_r2 = nn_model(x_train, y_train, x_valid, y_valid, data_settings["log_y_name"], output_dir = directories["training_output_dir"] , model_fln = '', mse_fln = '', n_neurons = 18, dropout_rate = 0.0, patience = 32, learning_rate = parameter, epochs = 2, batch_size = 8, dL01= dL01, nlayer= nlayer)        
         
         total_history[str(parameter)] = history.history
         final_train_loss[ipara] = history.history['loss'][-1]

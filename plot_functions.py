@@ -34,9 +34,11 @@ def view_data(df_full, varnames, ylabels, time_array, figname ='temp'):
     fig1.set_size_inches(8, nvar*2)
     
     for ivar in range(len(varnames)):
-        print("start plot " + ivar)
 
         varname = varnames[ivar]
+        
+        print("start plot " + varname)
+        
         ax1[ivar].scatter(time_array,df_full[varname],s = 0.1)
         ax1[ivar].set_ylabel(ylabels[ivar])
         
