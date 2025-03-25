@@ -29,7 +29,7 @@ def scale_arr_with_input(arr, mid_value, scale_value):
 
 
 def view_data(df_full, varnames, ylabels, time_array, figname ='temp'):
-    print("start viewdata")
+    # print("start viewdata")
     nvar = len(varnames)
 
     fig1, ax1 = plt.subplots(nvar,1, constrained_layout = True)
