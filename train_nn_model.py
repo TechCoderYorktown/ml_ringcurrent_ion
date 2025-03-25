@@ -129,7 +129,7 @@ def train_nn_model(energy, species, recalc = False, plot_data = False, save_data
     for ipara in range(len(para_set)):
         parameter = para_set[ipara]
 
-        model, history, valid_r2 = nn_model(x_train, y_train, x_valid, y_valid, data_settings["log_y_name"], output_dir = directories["training_output_dir"] , model_fln = '', mse_fln = '', n_neurons = 18, dropout_rate = 0.0, patience = 32, learning_rate = parameter, epochs = 2, batch_size = 8, dL01= dL01, nlayer= nlayer)        
+        model, history, valid_r2 = nn_model(x_train, y_train, x_valid, y_valid, data_settings["log_y_name"], output_dir = directories["training_output_dir"] , model_fln = '', mse_fln = '', n_neurons = 18, dropout_rate = 0.0, patience = 32, learning_rate = parameter, epochs = 2, batch_size = 8, dL01= dL01, nlayer= 3)        
         
         total_history[str(parameter)] = history.history
         final_train_loss[ipara] = history.history['loss'][-1]
