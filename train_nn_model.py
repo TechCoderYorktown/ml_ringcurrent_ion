@@ -14,10 +14,7 @@ train_nn_model('51767680', 'h', number_history = 7)
 """
 
 import numpy as np
-import matplotlib.pyplot as plt 
-import pandas as pd
 from sklearn.metrics import r2_score
-import matplotlib as mpl
 import tensorflow as tf
 import os
 

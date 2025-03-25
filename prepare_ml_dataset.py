@@ -17,16 +17,18 @@ x_train, x_valid, x_test, y_train, y_valid, y_test = prepare_ml_dataset('972237'
 
 import os
 import numpy as np
-import pandas as pd
+# import pandas as pd
+import modin.pandas as pd
+
 import math
-import swifter
+# import swifter
 # import ml_wrappers
-from time_string import time_string
+# from time_string import time_string
 # import warnings
 import fnmatch
 from sklearn.model_selection import train_test_split
 # import matplotlib.pyplot as plt
-import re
+# import re
 
 import plot_functions
 import prepare_fulldata
@@ -74,15 +76,6 @@ def get_good_index(df_full, data_settings, fulldata_settings):
     # print(sum(index_good))
     if data_settings["dL01"]:
         index_good = index_good & get_dL01_mask(df_full)
-    # print(sum(index_good))
-    
-    # 1313856
-    # 1313856
-    # 1312128
-    # 1120524
-    # 1118919
-    # 1118919
-    # 344843
     
     return index_good
 
