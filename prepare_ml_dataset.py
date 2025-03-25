@@ -21,7 +21,7 @@ import pandas as pd
 # import modin.pandas as pd
 
 import math
-# import swifter
+import swifter
 # import ml_wrappers
 # from time_string import time_string
 # import warnings
@@ -272,9 +272,9 @@ def load_ml_dataset(energy, species, recalc = False, plot_data = False, save_dat
 
             save_csv_data(x_train, x_valid, x_test, y_train, y_valid, y_test , dataset_csv)
             
-        print("start plot data") 
-        
         if plot_data:
+            print("start plot data") 
+
             plot_y_data(df_data.loc[index_good, [ fulldata_settings['datetime_name'],  data_settings["y_name"],data_settings["log_y_name"]]], data_settings["y_name"],data_settings["log_y_name"],  fulldata_settings['datetime_name'], fulldataset_csv["df_y"]+ data_settings["log_y_name"])
             
             plot_coor_data(df_data.loc[index_good, [fulldata_settings['datetime_name'],fulldata_settings["coor_names"]  ]], fulldata_settings["coor_names"],  fulldata_settings['datetime_name'], fulldataset_csv["df_coor"])
@@ -283,7 +283,7 @@ def load_ml_dataset(energy, species, recalc = False, plot_data = False, save_dat
         
     return x_train, x_valid, x_test, y_train, y_valid, y_test       
 
-def prepare_ml_dataset_batch(raw_feature_names =  ['symh','asyh','ae','asyd'] , number_history_arr = [7,8],forecast_arr = ["all", "index","none"],dL01_arr = [True, False],  species_arr = ['h', 'o'],energy_arr = ['972237', '51767680']   ):
+def prepare_ml_dataset_batch(raw_feature_names =  ['symh','asyh','ae','asyd'] , number_history_arr = [7,8],forecast_arr = ["all", "index","none"],dL01_arr = [True, False],  species_arr = ['h', 'o'],energy_arr = ['972237', '51767680'], recalc = False, plot_data = False, save_data = True):
     '''
         raw_feature_names:    #['symh','asyh','asyd','ae','f10.7','kp','swp','swn','swv','by','bz']
 
@@ -294,7 +294,7 @@ def prepare_ml_dataset_batch(raw_feature_names =  ['symh','asyh','ae','asyd'] , 
             for dL01 in dL01_arr:
                 for species in species_arr:
                     for energy in energy_arr:
-                        load_ml_dataset(energy, species, recalc = True, plot_data = True, save_data = True, dL01=dL01, forecast = forecast, number_history =number_history,raw_feature_names =  raw_feature_names)
+                        load_ml_dataset(energy, species, recalc = recalc, plot_data = plot_data, save_data = save_data, dL01=dL01, forecast = forecast, number_history =number_history,raw_feature_names =  raw_feature_names)
 
 def __main__():
     if __name__ == "__name__":

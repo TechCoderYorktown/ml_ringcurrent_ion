@@ -53,7 +53,7 @@ def initialize_fulldatacsv(directories):
     
 def initialize_datacsv(directories, species, energy, number_history):    
     dataset_csv = {
-        "df_y"    : directories["ml_data"] + species+'_'+energy + '_' + 'days_' + "df_y.csv",
+        "df_y"    : directories["ml_data"] + species+'_'+energy + '_' +  "df_y.csv",
         "df_coor" : directories["ml_data"] + "df_coor.csv",
         "df_feature" : directories["ml_data"] + "df_features.csv",
         "df_data" : directories["ml_data"] + species+'_'+energy + '_' +  "df_data.csv",

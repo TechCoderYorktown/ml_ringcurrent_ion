@@ -15,8 +15,8 @@ Examples
 
 import os
 import numpy as np
-# import pandas as pd
-import modin.pandas as pd
+import pandas as pd
+# import modin.pandas as pd
 from time_string import time_string
 
 import plot_functions
