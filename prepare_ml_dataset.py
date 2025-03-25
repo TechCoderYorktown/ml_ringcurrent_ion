@@ -285,5 +285,18 @@ def prepare_ml_dataset(energy, species, recalc = False, plot_data = False, save_
 
 def __main__():
     if __name__ == "__name__":
-        prepare_ml_dataset(['972237'], ['h'], recalc = False)
+        raw_feature_names =  ['symh','asyh','ae','asyd'] #['symh','asyh','asyd','ae','f10.7','kp','swp','swn','swv','by','bz']
+
+        number_history_arr = [7,8]
+        forecast_arr = ["all", "index","none"]
+        dL01_arr = [True, False]
+        species_arr = ['h', 'o']
+        energy_arr = ['972237', '51767680']  
+
+        for number_history in number_history_arr:
+            for forecast in forecast_arr:
+                for dL01 in dL01_arr:
+                    for species in species_arr:
+                        for energy in energy_arr:
+                            prepare_ml_dataset(energy, species, recalc = True, plot_data = False, save_data = True, dL01=dL01, forecast = forecast, number_history =number_history,raw_feature_names =  raw_feature_names)
 

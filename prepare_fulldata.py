@@ -338,7 +338,7 @@ def load_fulldata(energy =(np.array([51767.680, 44428.696, 38130.120, 32724.498,
     
     if create_full_data == True:
         print("You have calculated full data.")
-        return True
+        return pd.DataFrame(), directories, fulldataset_csv, fulldata_settings
     
     df_data = pd.concat([df_y, df_coor[fulldata_settings['coor_names']], df_features_history[fulldata_settings['feature_history_names']]], axis=1)
     
@@ -347,5 +347,5 @@ def load_fulldata(energy =(np.array([51767.680, 44428.696, 38130.120, 32724.498,
 
 def __main__():
     if __name__ == "__name__":
-        load_fulldata('972237', 'h',recalc=True, raw_feature_names = ['symh','asyd','ae','asyh'], number_history = 7)
+        load_fulldata(save_data = True, plot_data = True, recalc=True, create_full_data = True)
 
