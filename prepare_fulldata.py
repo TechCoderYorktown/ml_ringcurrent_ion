@@ -343,9 +343,16 @@ def load_fulldata(energy =(np.array([51767.680, 44428.696, 38130.120, 32724.498,
     df_data = pd.concat([df_y, df_coor[fulldata_settings['coor_names']], df_features_history[fulldata_settings['feature_history_names']]], axis=1)
     
     return df_data, directories, fulldataset_csv, fulldata_settings
-   
+
+def prepare_fulldata_batch():
+    save_data = True
+    plot_data = True
+    recalc = True
+    create_full_data = True
+    
+    load_fulldata(save_data = save_data, plot_data = plot_data, recalc=recalc, create_full_data = create_full_data)
 
 def __main__():
     if __name__ == "__name__":
-        load_fulldata(save_data = True, plot_data = True, recalc=True, create_full_data = True)
+      prepare_fulldata_batch()  
 
