@@ -48,7 +48,7 @@ import initialize_var
 def get_dL01_mask(df_full):
     l10 = df_full["l"].swifter.apply(lambda x: np.floor(x*10))
     l10_pre = np.append(0,np.array(l10[0:(len(l10)-1)]))
-    index_mask = l10 == l10_pre
+    index_mask = l10 != l10_pre
     
     return index_mask
  
@@ -65,7 +65,7 @@ def get_good_index(df_full, data_settings, fulldata_settings):
     
     index_good_rel05 = ((df_full[fulldata_settings["datetime_name"]] < '2017-10-29') | (df_full[fulldata_settings["datetime_name"]] > '2017-11-01')) 
     
-    index_good_y = np.isfinite(df_full[data_settings["y_name"]]) # we take out 0 measurement data because we are using the log
+    index_good_y = np.isfinite(df_full[data_settings["y_name"]]) # 
     # print(sum(index_good_coor))
     # print(sum(index_good_rel05))
     # print(sum(index_good_y))
@@ -274,11 +274,13 @@ def load_ml_dataset(energy, species, recalc = False, plot_data = False, save_dat
             save_csv_data(x_train, x_valid, x_test, y_train, y_valid, y_test , dataset_csv)
             
         if plot_data:
-            plot_y_data(df_data[[ fulldata_settings['datetime_name'],  data_settings["y_name"],data_settings["log_y_name"]]], data_settings["y_name"],data_settings["log_y_name"],  fulldata_settings['datetime_name'], dataset_csv["df_y"]+ data_settings["log_y_name"])
+            plot_y_data(df_data[ [ fulldata_settings['datetime_name'],  data_settings["y_name"],data_settings["log_y_name"]]], data_settings["y_name"],data_settings["log_y_name"],  fulldata_settings['datetime_name'], dataset_csv["df_y"]+ '_'+ data_settings["log_y_name"])
             
-            plot_coor_data(df_data[ [fulldata_settings['datetime_name'],fulldata_settings["coor_names"]  ]], fulldata_settings["coor_names"],  fulldata_settings['datetime_name'], dataset_csv["df_coor"])
-                        
-            plot_feature_data(df_data[ [fulldata_settings['datetime_name'],fulldata_settings["feature_names"] ]], fulldata_settings["feature_names"],  fulldata_settings['datetime_name'], dataset_csv["df_feature"])
+            plot_coor_data(df_data[[fulldata_settings['datetime_name']]+fulldata_settings["coor_names"]], fulldata_settings["coor_names"],  fulldata_settings['datetime_name'], dataset_csv["df_coor"])
+
+            to_plot_feature_name = [s + "_2h" for s in fulldata_settings["feature_names"]]
+            plot_feature_data(df_data[[fulldata_settings['datetime_name']] + to_plot_feature_name], to_plot_feature_name, fulldata_settings['datetime_name'], dataset_csv["df_feature"])
+
         
     return x_train, x_valid, x_test, y_train, y_valid, y_test       
 

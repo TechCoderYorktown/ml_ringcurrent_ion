@@ -44,7 +44,8 @@ def view_data(df_full, varnames, ylabels, time_array, figname ='temp'):
         ax1[ivar].scatter(time_array,df_full[varname],s = 0.1)
         ax1[ivar].set_ylabel(ylabels[ivar])
         
-    plt.savefig(figname + ".png", format = "png", dpi = 300)
+    plt.tight_layout()    
+    plt.savefig(figname + ".png", format = "png", dpi = 300, bbox_inches="tight")
     
 def plot_loss_function_history(history ,figname="tmp.png",ylim=0):
     fig1 = plt.figure(figsize=(10, 8),facecolor='w')

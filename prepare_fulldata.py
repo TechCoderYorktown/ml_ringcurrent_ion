@@ -103,7 +103,7 @@ def calculate_log_for_y(df_y, y_name, fulldata_settings, log_y_filename, datetim
     log_y_name = "log_"+y_name
     # y_names = [i for i in df_full.columns if re.findall(r'^[a-z]_flux_', i)]  
     index = df_y[y_name] == 0 
-    df_y.loc[index, y_name] = 1e-3
+    df_y.loc[index, y_name] = 1e-5
 
     # Here we intergrated over for geomatrics and convert the unit  first and then take the log   np.log10(x*1e3*4*math.pi))
     df_y[log_y_name] = np.log10(df_y[y_name])
