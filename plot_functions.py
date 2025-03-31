@@ -10,8 +10,8 @@ Examples
 import tensorflow as tf
 import numpy as np
 import matplotlib.pyplot as plt
-# import pandas as pd
-import modin.pandas as pd
+import pandas as pd
+# import modin.pandas as pd
 
 from sklearn.metrics import r2_score
 import matplotlib as mpl

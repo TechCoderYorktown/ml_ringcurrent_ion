@@ -96,9 +96,9 @@ def remove_features_by_time(feature_history_names, pattern):
     return feature_history_names 
 
 def create_ml_data(df_data, index_train, index_valid,index_test, y_name, coor_names, history_feature_names):
-    y_train = np.array(df_data.loc[index_train, y_name],dtype='float')
-    y_valid = np.array(df_data.loc[index_valid, y_name],dtype='float')
-    y_test  = np.array(df_data.loc[index_test, y_name],dtype='float')
+    y_train = np.array(df_data.loc[index_train, y_name],dtype='float')+6
+    y_valid = np.array(df_data.loc[index_valid, y_name],dtype='float')+6
+    y_test  = np.array(df_data.loc[index_test, y_name],dtype='float')+6
 
     x_train = np.array(df_data.loc[index_train, coor_names + history_feature_names], dtype='float')
     x_valid = np.array(df_data.loc[index_valid, coor_names + history_feature_names], dtype='float')

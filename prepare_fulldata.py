@@ -269,7 +269,7 @@ def create_feature_history(df_feature, fulldata_settings, raw_feature_name, scal
     
     if save_data:
         df_history.to_csv(feature_history_filename+ ".csv", index=False)
-    
+        print("Writing csv data completed for " + feature_history_filename)
     fulldata_settings["feature_history_names"] = feature_history_names
     return df_history[feature_history_names], fulldata_settings
 
@@ -298,7 +298,7 @@ def load_features(directories, fulldataset_csv, fulldata_settings, recalc = Fals
             
         df_features_history[feature_history_names] = idf_feature_history
         fulldata_settings["feature_history_names"] = fulldata_settings["feature_history_names"] + feature_history_names
-        
+    
     return df_features_history, df_full, fulldata_settings
 
 def load_fulldata(energy =(np.array([51767.680, 44428.696, 38130.120, 32724.498, 28085.268, 24103.668, 20686.558, 17753.876, 15236.896, 13076.798, 11222.936, 9631.899, 8266.406, 7094.516, 6088.722, 5225.528, 4484.742, 3848.919, 3303.284, 2834.964, 2433.055, 2088.129, 1792.096, 1538.062, 1319.977, 1132.846, 972.237]) * 1000.).astype(int).astype(str), species = ['h','o'], recalc = False, release = 'rel05', average_time = 300, raw_coor_names = ["mlt","l","lat"], coor_names=["cos0", 'sin0', 'scaled_lat','scaled_l'], raw_feature_names = ['symh','asyh','asyd','ae','f10.7','kp','swp','swn','swv','by','bz'], number_history = 30, history_resolution = 2*3600., save_data = False, plot_data = False, df_full = [], create_full_data = False):
