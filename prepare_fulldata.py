@@ -334,7 +334,7 @@ def load_fulldata(energy =(np.array([51767.680, 44428.696, 38130.120, 32724.498,
     
     df_y, df_full, fulldata_settings = load_y(directories, fulldataset_csv, fulldata_settings, recalc = recalc, df_full = df_full, save_data = save_data, plot_data = plot_data, energy_bins = energy, species_arr = species)
 
-    return True
+    # return True
 
     df_features_history, df_full, fulldata_settings = load_features(directories, fulldataset_csv, fulldata_settings, recalc = recalc, df_full = df_full, save_data = save_data, plot_data = plot_data, raw_feature_names = raw_feature_names)   
     
@@ -346,11 +346,11 @@ def load_fulldata(energy =(np.array([51767.680, 44428.696, 38130.120, 32724.498,
     
     return df_data, directories, fulldataset_csv, fulldata_settings
 
-def prepare_fulldata_batch():
-    save_data = True
-    plot_data = True
-    recalc = True
-    create_full_data = True
+def prepare_fulldata_batch(save_data = True,plot_data = True, recalc = True,   create_full_data = True):
+    # save_data = True
+    # plot_data = True
+    # recalc = True
+    # create_full_data = True
     
     load_fulldata(save_data = save_data, plot_data = plot_data, recalc=recalc, create_full_data = create_full_data)
 
