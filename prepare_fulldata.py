@@ -106,7 +106,7 @@ def calculate_log_for_y(df_y, y_name, fulldata_settings, log_y_filename, datetim
     df_y.loc[index, y_name] = 1e-5
 
     # Here we intergrated over for geomatrics and convert the unit  first and then take the log   np.log10(x*1e3*4*math.pi))
-    df_y[log_y_name] = np.log10(df_y[y_name])
+    df_y[log_y_name] = np.log10(df_y[y_name])+6 #### Add a factor of 6 here to ensure all data are positive
     
     fulldata_settings["y_names"].append(y_name)
     fulldata_settings["log_y_names"].append("log_"+y_name) #["log_" + str(x) for x in y_name]
@@ -135,7 +135,7 @@ def load_y(directories, fulldataset_csv, fulldata_settings, recalc = False, df_f
                     df_full = read_probes_data(directories["rawdata_dir"], fulldata_settings)
                 idf_y = df_full[[fulldata_settings["datetime_name"], y_name]]
                 idf_y, fulldata_settings = calculate_log_for_y(idf_y, y_name, fulldata_settings, log_y_filename, fulldata_settings["datetime_name"], save_data = save_data, plot_data = plot_data)
-                
+                                
             if not 'df_y' in locals():
                 df_y = idf_y
             else:
@@ -333,6 +333,8 @@ def load_fulldata(energy =(np.array([51767.680, 44428.696, 38130.120, 32724.498,
     df_coor, df_full, fulldata_settings = load_coor(directories, fulldataset_csv, fulldata_settings, recalc = recalc, df_full = df_full, save_data = save_data, plot_data = plot_data)
     
     df_y, df_full, fulldata_settings = load_y(directories, fulldataset_csv, fulldata_settings, recalc = recalc, df_full = df_full, save_data = save_data, plot_data = plot_data, energy_bins = energy, species_arr = species)
+
+    return True
 
     df_features_history, df_full, fulldata_settings = load_features(directories, fulldataset_csv, fulldata_settings, recalc = recalc, df_full = df_full, save_data = save_data, plot_data = plot_data, raw_feature_names = raw_feature_names)   
     
