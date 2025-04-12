@@ -27,7 +27,6 @@ def scale_arr_with_input(arr, mid_value, scale_value):
 #     print(mid_value, scale_value)
     return(scaled_arr)
 
-
 def view_data(df_full, varnames, ylabels, time_array, figname ='temp'):
     # print("start viewdata")
     nvar = len(varnames)
@@ -65,9 +64,9 @@ def plot_loss_function_history(history ,figname="tmp.png",ylim=0):
     
     plt.savefig(figname+".png", format="png", dpi=300)
     
-    plt.show()
+    # plt.show()
 
-def plot_loss_function_historys(total_history,para_set,para_str = '', figname="tmp.png",ylim=0, dataset_name='val_loss'):
+def plot_loss_function_historys(total_history, para_set,para_str = '', figname="tmp.png",ylim=0, dataset_name='val_loss'):
 #     fig1 = plt.figure(figsize=(10, 8),facecolor='w')   
     for ihistory in range(len(total_history)):
         history = total_history[str(para_set[ihistory])]
@@ -87,7 +86,7 @@ def plot_loss_function_historys(total_history,para_set,para_str = '', figname="t
     
     plt.savefig(figname+'_'+dataset_name+".png", format="png", dpi=300)
     
-    plt.show()
+    # plt.show()
     
 def factor_line_calculation(xrange, factor):
     yrange = xrange
@@ -154,7 +153,7 @@ def plot_correlation_heatmap(y_test_reshaped, y_test_pred_reshaped, xrange=[4,9]
     cbar.ax.tick_params(labelsize=16)
     cbar.set_label('# of 5-minute data', fontsize=20)
     plt.savefig(figname+".png", format="png", dpi=300)
-    plt.show()
+    # plt.show()
 
     
 def plot_global_distributions(df_omni, models, exmaple_start_time,exmaple_end_time, cut_times, y_names, coor_names, feature_history_names, vmax = 20, vmin = 10, lat_setting = 0, output_filename = 'global.png', v_label = ''):

@@ -174,12 +174,15 @@ def save_csv_data(x_train, x_valid, x_test, y_train, y_valid, y_test, dataset_cs
     # pd.DataFrame(y_test).to_csv(dataset_csv["y_test"], index=False) 
 
 def load_csv_data(dataset_csv):
+    print("start to load csv data")
     x_train = np.genfromtxt(dataset_csv["x_train"], delimiter=',', dtype='float32')
     x_valid = np.genfromtxt(dataset_csv["x_valid"], delimiter=',', dtype='float32')
     x_test = np.genfromtxt(dataset_csv["x_test"], delimiter=',', dtype='float32')
     y_train = np.genfromtxt(dataset_csv["y_train"], delimiter=',', dtype='float32')
     y_valid = np.genfromtxt(dataset_csv["y_valid"], delimiter=',', dtype='float32')
     y_test = np.genfromtxt(dataset_csv["y_test"], delimiter=',', dtype='float32')
+    print("csv data loading complete")
+
     # x_train = pd.read_csv(dataset_csv["x_train"], index_col=False)
     # y_train = pd.read_csv(dataset_csv["y_train"], index_col=False)
     # x_valid = pd.read_csv(dataset_csv["x_valid"], index_col=False)
@@ -230,10 +233,12 @@ def save_df_data(df_data,  index_train, index_valid, index_test, dataset_csv):
 
 def load_ml_dataset(energy, species, recalc = False, plot_data = False, save_data = True, dL01=True, average_time = 300, raw_feature_names = ['symh','asyh','asyd','ae','f10.7','kp','swp','swn','swv','by','bz'],  forecast = "none", number_history = 7, test_ts = '2017-01-01', test_te = '2018-01-01', skip_loading = False):
     
-    np.set_printoptions(precision=4)
+    # np.set_printoptions(precision=4)
     
-    dataset_csv, data_settings, directories = initialize_var.initialize_data_var(energy=energy, species=species, raw_feature_names = raw_feature_names, forecast = forecast, number_history = number_history, test_ts=test_ts, test_te=test_te, dL01=dL01)
+    data_directories, dataset_csv, data_settings = initialize_var.initialize_data_var(energy=energy, species=species, raw_feature_names = raw_feature_names, forecast = forecast, number_history = number_history, test_ts=test_ts, test_te=test_te, dL01=dL01)
     
+    print(dataset_csv["x_train"])
+
     if os.path.exists(dataset_csv["x_train"]) & (recalc != True):
         if skip_loading == True:
             print(dataset_csv["x_train"] + ' exists ')
