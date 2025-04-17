@@ -112,11 +112,23 @@ def train_nn_model(energy, species, recalc = False, plot_data = True, save_data 
     print("start loading data")
     x_train, x_valid, x_test, y_train, y_valid, y_test = prepare_ml_dataset.load_ml_dataset(energy, species, recalc = recalc, plot_data = plot_data, save_data = save_data, dL01=dL01, raw_feature_names = raw_feature_names,  forecast = forecast, number_history = number_history)   
     
+    mask = y_train == 1
+    y_train = y_train[~mask]
+    x_train = x_train[~mask,:]
+    
+    mask = y_valid == 1
+    y_valid = y_valid[~mask]
+    x_valid = x_valid[~mask,:]
+    
+    mask = y_test == 1
+    y_test = y_test[~mask]
+    x_test = x_test[~mask,:]
+    
     has_nan = np.any(np.isnan(x_train)) | np.any(np.isnan(x_valid)) | np.any(np.isnan(x_test)) | np.any(np.isnan(y_train)) | np.any(np.isnan(y_valid)) | np.any(np.isnan(y_test)) 
     if has_nan:
         print("data has NaN")
         return False
-
+    
     para_name = "learning_rate"
     para_set = [5.e-5, 1.5e-4, 5.e-4]
 
